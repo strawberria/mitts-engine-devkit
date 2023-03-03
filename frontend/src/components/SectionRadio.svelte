@@ -7,8 +7,9 @@
     import Section from "./Section.svelte";
     import SelectorRadio from "./SelectorRadio.svelte";
 
+    export let height = null;
+    export let width = null;
     export let selectedIDStore: Writable<string | null> = writable(null);
-    export let deselectable: boolean = false;
     export let allowDuplication: boolean = true;
     export let allowUnlinking: boolean = true;
     export let selectorRadioData: SelectorRadioData[];
@@ -30,7 +31,9 @@
     export { customClass as class };
 </script>
 
-<Section label={label}
+<Section height={height}
+    width={width}
+    label={label}
     class={customClass}
     innerClass={innerClass}>
     <svelte:fragment slot="header">
@@ -79,7 +82,7 @@
             {/if}
         </div>
     </svelte:fragment>
-    <svelte:fragment slot="body">
+    <svelte:fragment slot="content">
         <SelectorRadio selectedID={$selectedIDStore}
             selectorRadioData={selectorRadioData}
             on:dispatchClick={forward} />

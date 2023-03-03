@@ -3,25 +3,36 @@
     import SectionRadio from "../components/SectionRadio.svelte";
     import { selectedActionIDStore } from "../utilities/constants";
     import { projectStore } from "../utilities/project";
-    import type { SelectorRadioData } from "../utilities/typings";
+    import type { ProjectActionData, SelectorRadioData } from "../utilities/typings";
 
     let selectorRadioData: SelectorRadioData[] = [];
     projectStore.subscribe(projectData => {
-        selectorRadioData = Object.entries(projectData.data.actions).map(
-            ([id, actionData]) => ({
+        selectorRadioData = projectData.game.actions
+            .map((id): [string, ProjectActionData] => [id, projectData.data.actions[id]])
+            .map(([id, actionData]): SelectorRadioData => ({
                 id: id,
                 component: RadioAction,
                 props: { data: actionData }
             })
         );
     });
+
+    const deselectable = true;
+    function handleClick(event: any) {
+        if($selectedActionIDStore !== event.detail.id) {
+            $selectedActionIDStore = event.detail.id;
+        } else if(deselectable) {
+            $selectedActionIDStore = null;
+        }
+    }
 </script>
 
-<SectionRadio label="Game Actions"
+<SectionRadio height={60}
+    label="Game Actions"
     selectedIDStore={selectedActionIDStore}
     selectorRadioData={selectorRadioData}
     order={$projectStore.game.actions}
     data={$projectStore.data.actions}
     defaultValue={{"name": "", "verb": "", "order": false, "two": false}}
-    on:dispatchClick={(e) => { $selectedActionIDStore = e.detail.id }}>
+    on:dispatchClick={handleClick}>
 </SectionRadio>

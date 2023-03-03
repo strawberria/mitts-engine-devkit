@@ -6,7 +6,7 @@
 </script>
 
 <Section label="Game Information">
-    <svelte:fragment slot="body">
+    <svelte:fragment slot="content">
         <LabelTextInput bind:value={$projectStore.game.metadata.title}
             label={"Title"}
             placeholder={"Inescapable Escape Game!"}

@@ -7,7 +7,7 @@
 <div class={`h-full
     flex flex-col items-stretch space-y-3
     ${customClass} ${width === null ? "grow" : ""}`}
-    style={width != null
+    style={width !== null
         ? `width: ${width}%` : ""}>
     <slot />
 </div>
