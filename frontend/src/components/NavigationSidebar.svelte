@@ -44,7 +44,7 @@
 
     <div class="grow" />
 
-    <div class="flex flex-row items-center space-x-3
+    <div class="flex flex-row items-center space-x-2
         mb-2">
         <IconButton label="Import"
             class="w-22"

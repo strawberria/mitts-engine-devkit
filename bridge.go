@@ -49,13 +49,13 @@ func (b *Bridge) ImportProject() string {
 
 // LoadImage loads an image and converts it to base64
 func (b *Bridge) LoadImage() string {
-	filename, err := dialog.File().Title("Load Image").Filter("Image Files", "png", "jpeg", "jpg", "gif", "webp").Load()
+	path, err := dialog.File().Title("Load Image").Filter("Image Files", "png", "jpeg", "jpg", "gif", "webp").Load()
 	if err != nil {
-		return err.Error()
+		return ""
 	}
-	data, err := os.ReadFile(filename)
+	data, err := os.ReadFile(path)
 	if err != nil {
-		return err.Error()
+		return ""
 	}
 
 	var base64Encoding string

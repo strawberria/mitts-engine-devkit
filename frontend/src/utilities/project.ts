@@ -2,8 +2,8 @@ import _ from "lodash-es"
 import { Writable, get, writable } from "svelte/store";
 import { ExportProject, ImportProject } from "../../wailsjs/go/main/Bridge"
 import type { ProjectData, StoredData } from "./typings";
-import { engineVersion, randomIDLength, selectedActionIDStore } from "./constants";
-import { metadataValid } from "./validation";
+import { engineVersion, randomIDLength, selectedActionIDStore, selectedImageIDStore } from "./constants";
+import { metadataValid, storageValid } from "./validation";
 
 export const projectStore: Writable<ProjectData> = writable<ProjectData>({
     custodial: {
@@ -16,10 +16,12 @@ export const projectStore: Writable<ProjectData> = writable<ProjectData>({
             version: "",
             synopsis: "",
         },
-        actions: []
+        actions: [],
+        images: [],
     },
     data: {
-        actions: {}
+        actions: {},
+        images: {},
     }
 });
 
@@ -31,9 +33,8 @@ projectStore.subscribe(value => {
     const bundleValidData = get(bundleValidStore);
     const validData = get(validStore);
 
-    const metadataValidResults = metadataValid();
-    bundleValidData["metadata"] = metadataValidResults[1];
-    validData["metadata"] = metadataValidResults[0];
+    [validData["metadata"], bundleValidData["metadata"]] = metadataValid();
+    [validData["storage"], bundleValidData["storage"]] = storageValid();
 
     bundleValidStore.set(bundleValidData);
     validStore.set(validData);
@@ -59,8 +60,8 @@ class MutateProject {
         data[newID] = cloned;
         order.push(newID);
 
-        const selectedID = get(selectedIDStore);
-        if(selectedID === null) { selectedIDStore.set(newID); }
+        // const selectedID = get(selectedIDStore);
+        // if(selectedID === null) { selectedIDStore.set(newID); }
     }
     genericDelete(order: string[], data: StoredData<any>, selectedIDStore: Writable<string | null>) {
         const oldSelectedID = get(selectedIDStore);
@@ -93,6 +94,7 @@ class MutateProject {
             // Reset any selected ID stores to null
             function resetIfValue(data: string, value: string) { return data === value ? null : data; }
             selectedActionIDStore.update(d => resetIfValue(d, oldSelectedID));
+            selectedImageIDStore.update(d => resetIfValue(d, oldSelectedID));
 
             // Only delete after trim to prevent hiccups
             delete data[oldSelectedID];

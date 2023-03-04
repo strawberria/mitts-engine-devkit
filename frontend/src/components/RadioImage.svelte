@@ -2,11 +2,11 @@
     import { recursiveCheckValid } from "../utilities/validation";
     import { createEventDispatcher } from "svelte";
     import { bundleValidStore } from "../utilities/project";
-    import type { ProjectActionData } from "../utilities/typings";
+    import type { ProjectImageData } from "../utilities/typings";
 
     export let id: string;
     export let selected: boolean;
-    export let data: ProjectActionData;
+    export let data: ProjectImageData;
     let customClass: string;
     export { customClass as class };
 
@@ -15,22 +15,28 @@
 
     let valid = false;
     bundleValidStore.subscribe(_ => { 
-        valid = recursiveCheckValid($bundleValidStore.metadata.actions[id]); 
+        valid = recursiveCheckValid($bundleValidStore.storage.images[id]); 
     });
 </script>
 
 <div class={`flex flex-row justify-between space-x-1
-    rounded border 
+    rounded border items-center
     p-2 pl-4 pr-4
     ${customClass} ${selected === true
-        ? ("text-slate-300 bg-slate-750 " + (valid
+        ? ("text-slate-300 bg-slate-750 " + (valid 
             ? "border-slate-600" : "border-red-700"))
         : ("text-slate-400 bg-slate-775 " + (valid
             ? "border-slate-700" : "border-red-900"))}`}
     on:click={handleClick}>
-    <p class="text-left w-11/12 min-w-0 truncate">
-        {data.name} {data.verb !== "" ? `[A ${data.verb} B]` : ""}
-    </p>
+    <div class="flex flex-col w-full">
+        <p class="text-left w-11/12 min-w-0 truncate h-6">
+            {data.name}
+        </p>
+        <p class={`text-left w-11/12 text-xs min-w-0 truncate h-5
+            ${selected === true ? "text-slate-400" : "text-slate-500"}`}>
+            {data.devName}
+        </p>
+    </div>
     <p class={`font-mono ${selected === true
         ? "text-slate-500"
         : "text-slate-600"}`}>

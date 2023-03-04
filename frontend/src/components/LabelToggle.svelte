@@ -8,7 +8,7 @@
 <div class={`flex flex-col items-start space-y-0.5
     ${customClass}`}>
     <p class="pl-1 mb-2 
-        text-slate-400 text-sm">
+        text-slate-400 text-sm select-none">
         {label}
     </p>
     <label class="inline-flex relative items-center 

@@ -19,9 +19,11 @@ export interface ProjectData {
             synopsis: string;
         }
         actions: string[];
+        images:  string[];
     }
     data: {
         actions: StoredData<ProjectActionData>;
+        images:  StoredData<ProjectImageData>;
     }
 }
 
@@ -34,6 +36,13 @@ export interface ProjectActionData extends ProjectConstruct {
     verb:  string;
     order: boolean;
     two:   boolean;
+}
+
+export interface ProjectImageData extends ProjectConstruct {
+    imageb64:   string | null;
+    name:       string;
+    devName:    string;
+    resolution: [number, number] | null;
 }
 
 export interface SelectorRadioData {

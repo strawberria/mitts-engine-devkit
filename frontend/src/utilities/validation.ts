@@ -1,6 +1,5 @@
 import { get } from "svelte/store";
 import { projectStore } from "./project";
-import type { ProjectActionData } from "./typings";
 
 export function recursiveCheckValid(checkData: any) {
     if(typeof checkData !== "object") {
@@ -17,7 +16,7 @@ export function recursiveCheckValid(checkData: any) {
     return true;
 }
 
-export function metadataValid(): any { 
+export function metadataValid(): [boolean, any] { 
     const projectData = get(projectStore);
 
     const titleValid = projectData.game.metadata.title !== "";
@@ -27,7 +26,10 @@ export function metadataValid(): any {
 
     const actionsValid = {};
     for(const [id, actionData] of Object.entries(projectData.data.actions)) {
-        actionsValid[id] = actionData.name !== "" && actionData.verb !== "";
+        actionsValid[id] = {
+            name: actionData.name !== "",
+            verb: actionData.verb !== "",
+        };
     }
 
     const bundled = {
@@ -37,6 +39,27 @@ export function metadataValid(): any {
         synopsis: synopsisValid,
         actions: actionsValid,
     }
+    const valid = recursiveCheckValid(bundled);
+
+    return [valid, bundled];
+}
+
+export function storageValid(): [boolean, any] {
+    const projectData = get(projectStore);
+
+    const imagesValid = {};
+    for(const [id, imageData] of Object.entries(projectData.data.images)) {
+        imagesValid[id] = {
+            imageb64: imageData.imageb64 !== null,
+            name: imageData.name !== "",
+            devName: imageData.devName !== "",   
+        };
+    }
+
+    const bundled = {
+        images: imagesValid,
+    }
+
     const valid = recursiveCheckValid(bundled);
 
     return [valid, bundled];
