@@ -14,7 +14,7 @@
         text-slate-400 text-sm select-none">
         {label}
     </p>
-    <div class={`grow w-full rounded-sm
+    <div class={`grow w-full rounded
         bg-inherit border focus:outline-none 
         pl-2 pr-2 pt-1 pb-1
         ${!valid ? "border-red-800 focus-within:border-red-600" 

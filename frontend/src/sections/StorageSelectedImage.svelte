@@ -29,12 +29,7 @@
 {#if $selectedImageIDStore !== null}
     <Section label="Selected Image">
         <svelte:fragment slot="content">
-            <LabelTextInput class="w-3/4"
-                bind:value={$projectStore.data.images[$selectedImageIDStore].name}
-                label={"Name"}
-                placeholder={"Bedroom"}
-                valid={$bundleValidStore.storage.images[$selectedImageIDStore].name} />
-            <LabelTextInput class="w-3/4"
+            <LabelTextInput class="w-3/4" 
                 bind:value={$projectStore.data.images[$selectedImageIDStore].devName}
                 label={"Development Name"}
                 placeholder={"Bedroom (darkened)"}
@@ -59,10 +54,9 @@
                         </IconButton>
                     {/if}
                 </div>
-                
                 {#if $projectStore.data.images[$selectedImageIDStore].imageb64 !== null}
-                    <p class="text-slate-400">
-                        Resolution: {$projectStore.data.images[$selectedImageIDStore].resolution.join(" x ")} pixels
+                    <p class="text-slate-400 text-start">
+                        Resolution: {$projectStore.data.images[$selectedImageIDStore].resolution.join(" x ")}
                     </p>
                 {/if}
             </div>

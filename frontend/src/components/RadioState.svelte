@@ -2,11 +2,11 @@
     import { recursiveCheckValid } from "../utilities/validation";
     import { createEventDispatcher } from "svelte";
     import { bundleValidStore } from "../utilities/project";
-    import type { ProjectImageData } from "../utilities/typings";
+    import type { ProjectStateData } from "../utilities/typings";
 
     export let id: string;
     export let selected: boolean;
-    export let data: ProjectImageData;
+    export let data: ProjectStateData;
     let customClass: string;
     export { customClass as class };
 
@@ -15,7 +15,7 @@
 
     let valid = false;
     bundleValidStore.subscribe(_ => { 
-        valid = recursiveCheckValid($bundleValidStore.storage.images[id]); 
+        valid = recursiveCheckValid($bundleValidStore.states.states[id]); 
     });
 </script>
 
@@ -28,9 +28,15 @@
         : ("text-slate-400 bg-slate-750 " + (valid
             ? "border-slate-600" : "border-red-900"))}`}
     on:click={handleClick}>
-    <p class="text-left w-3/4 truncate">
+    <div class="flex flex-col w-full">
+        <p class="text-left w-11/12 min-w-0 truncate h-6">
             {data.devName}
-    </p>
+        </p>
+        <p class={`text-left w-11/12 text-xs min-w-0 truncate h-5
+            ${selected === true ? "text-slate-400" : "text-slate-500"}`}>
+            {data.type}
+        </p>
+    </div>
     <div class="grow" />
     <p class={`font-mono ${selected === true
         ? "text-slate-500"

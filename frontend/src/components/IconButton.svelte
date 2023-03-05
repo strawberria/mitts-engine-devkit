@@ -8,7 +8,7 @@
 
 <button class={`flex flex-row items-center justify-center
     text-slate-300 bg-slate-700 hover:bg-slate-600 focus:bg-slate-500
-    font-medium rounded-sm text-sm text-center select-none
+    font-medium rounded text-sm text-center select-none
     px-2.5 py-2 space-x-1.5 
     ${customClass}`}
     type="button"

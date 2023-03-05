@@ -2,8 +2,8 @@ import _ from "lodash-es"
 import { Writable, get, writable } from "svelte/store";
 import { ExportProject, ImportProject } from "../../wailsjs/go/main/Bridge"
 import type { ProjectData, StoredData } from "./typings";
-import { engineVersion, randomIDLength, selectedActionIDStore, selectedImageIDStore } from "./constants";
-import { metadataValid, storageValid } from "./validation";
+import { engineVersion, randomIDLength, selectedActionIDStore, selectedImageIDStore, selectedStateIDStore } from "./constants";
+import { metadataValid, storageValid, statesValid } from "./validation";
 
 export const projectStore: Writable<ProjectData> = writable<ProjectData>({
     custodial: {
@@ -18,10 +18,12 @@ export const projectStore: Writable<ProjectData> = writable<ProjectData>({
         },
         actions: [],
         images: [],
+        states: [],
     },
     data: {
         actions: {},
         images: {},
+        states: {},
     }
 });
 
@@ -29,12 +31,13 @@ export const bundleValidStore: Writable<{ [key: string]: any }> = writable({});
 export const validStore: Writable<{ [key: string]: boolean }> = writable({});
 
 // Check whether each is invalid
-projectStore.subscribe(value => {
+projectStore.subscribe(projectData => {
     const bundleValidData = get(bundleValidStore);
     const validData = get(validStore);
 
-    [validData["metadata"], bundleValidData["metadata"]] = metadataValid();
-    [validData["storage"], bundleValidData["storage"]] = storageValid();
+    [validData["metadata"], bundleValidData["metadata"]] = metadataValid(projectData);
+    [validData["storage"], bundleValidData["storage"]] = storageValid(projectData);
+    [validData["states"], bundleValidData["states"]] = statesValid(projectData);
 
     bundleValidStore.set(bundleValidData);
     validStore.set(validData);
@@ -65,44 +68,47 @@ class MutateProject {
     }
     genericDelete(order: string[], data: StoredData<any>, selectedIDStore: Writable<string | null>) {
         const oldSelectedID = get(selectedIDStore);
-        if(oldSelectedID !== null) {
-            selectedIDStore.set(null);
-            // Not sure if delay necessary to allow destroy 
-            const idIndex = order.findIndex(id => id === oldSelectedID);
-            order.splice(idIndex, 1);
-            selectedIDStore.set(order[idIndex]
-                ?? order[idIndex-1]
-                ?? null);
+        if(oldSelectedID === null) { return; }
 
-            // Brute-force cleanup of ID references, replacing with undefined
-            const projectData = get(projectStore);
-            function recursiveTrimID(currentData: any) {
-                // Array: iterate over data and either recursive trim or replace
-                for(const [index, data] of Object.entries(currentData)) {
-                    if(typeof data === "object" && data !== null) {
-                        // Object (dictionary) or array
-                        recursiveTrimID(data); 
-                    } else if(data == oldSelectedID) {
-                        // Could cause issues with arrays?
-                        currentData[index] = Array.isArray(currentData)
-                            ? undefined : "";
-                    }
+        selectedIDStore.set(null);
+        // Not sure if delay necessary to allow destroy 
+        const idIndex = order.findIndex(id => id === oldSelectedID);
+        order.splice(idIndex, 1);
+        selectedIDStore.set(order[idIndex]
+            ?? order[idIndex-1]
+            ?? null);
+
+        // Brute-force cleanup of ID references, replacing with undefined
+        const projectData = get(projectStore);
+        function recursiveTrimID(currentData: any) {
+            // Array: iterate over data and either recursive trim or replace
+            for(const [index, data] of Object.entries(currentData)) {
+                if(typeof data === "object" && data !== null) {
+                    // Object (dictionary) or array
+                    recursiveTrimID(data); 
+                } else if(data == oldSelectedID) {
+                    // Could cause issues with arrays?
+                    currentData[index] = Array.isArray(currentData)
+                        ? undefined : null;
                 }
             }
-            recursiveTrimID(projectData);
-
-            // Reset any selected ID stores to null
-            function resetIfValue(data: string, value: string) { return data === value ? null : data; }
-            selectedActionIDStore.update(d => resetIfValue(d, oldSelectedID));
-            selectedImageIDStore.update(d => resetIfValue(d, oldSelectedID));
-
-            // Only delete after trim to prevent hiccups
-            delete data[oldSelectedID];
         }
+        recursiveTrimID(projectData);
+
+        // Reset any selected ID stores to null
+        function resetIfValue(data: string, value: string) { return data === value ? null : data; }
+        selectedActionIDStore.update(d => resetIfValue(d, oldSelectedID));
+        selectedImageIDStore.update(d => resetIfValue(d, oldSelectedID));
+        selectedStateIDStore.update(d => resetIfValue(d, oldSelectedID));
+
+        // Only delete after trim to prevent hiccups
+        delete data[oldSelectedID];
     }
     genericDuplicate(order: string[], data: StoredData<any>, selectedIDStore: Writable<string | null>) {
         // Deep copy data using lodash utility (does set work?)
         const selectedID = get(selectedIDStore);
+        if(selectedID === null) { return; }
+
         const newID = randomID(randomIDLength);
         const existing = data[selectedID];
         const cloned = _.cloneDeep(existing);
@@ -111,58 +117,60 @@ class MutateProject {
         if(idIndex < 0) { return; } // should never occur
         order.splice(idIndex + 1, 0, newID);
     }
-    genericUnlink(order: string[], data: StoredData<any>, selectedIDStore: Writable<string | null>) {
-        // Disallow unlinking if only reference (nothing to unlink to)
-        const selectedID = get(selectedIDStore);
-        const projectData = get(projectStore);
-        function recurseOnlyReference(currentData: any) {
-            // Array: iterate over data and either recursive trim or replace
-            for(const data of Object.values(currentData)) {
-                if(typeof data === "object" && data !== null) {
-                    // Object (dictionary) or array
-                    recurseOnlyReference(data); 
-                } else if(data == selectedID) {
-                    // Could cause issues with arrays?
-                    return false;
-                }
-            }
+    // genericUnlink(order: string[], data: StoredData<any>, selectedIDStore: Writable<string | null>) {
+    //     // Disallow unlinking if only reference (nothing to unlink to)
+    //     const selectedID = get(selectedIDStore);
+    //     if(selectedID === null) { return; }
 
-            return true;
-        }
-        const onlyReference = recurseOnlyReference(projectData);
+    //     const projectData = get(projectStore);
+    //     function recurseOnlyReference(currentData: any) {
+    //         // Array: iterate over data and either recursive trim or replace
+    //         for(const data of Object.values(currentData)) {
+    //             if(typeof data === "object" && data !== null) {
+    //                 // Object (dictionary) or array
+    //                 recurseOnlyReference(data); 
+    //             } else if(data == selectedID) {
+    //                 // Could cause issues with arrays?
+    //                 return false;
+    //             }
+    //         }
 
-        // Deep copy data using lodash utility
-        const newID = randomID(randomIDLength);
-        const existing = data[selectedID];
-        const cloned = _.cloneDeep(existing);
-        data[newID] = cloned;
-        const idIndex = order.findIndex(id => id === selectedID);
-        if(idIndex < 0) { return; } // should never occur
-        order[idIndex] = newID;
-        selectedIDStore.set(newID);
+    //         return true;
+    //     }
+    //     const onlyReference = recurseOnlyReference(projectData);
 
-        // Delete previous value if only reference within project
-        if(onlyReference) { delete data[selectedID]; }
-    }
+    //     // Deep copy data using lodash utility
+    //     const newID = randomID(randomIDLength);
+    //     const existing = data[selectedID];
+    //     const cloned = _.cloneDeep(existing);
+    //     data[newID] = cloned;
+    //     const idIndex = order.findIndex(id => id === selectedID);
+    //     if(idIndex < 0) { return; } // should never occur
+    //     order[idIndex] = newID;
+    //     selectedIDStore.set(newID);
+
+    //     // Delete previous value if only reference within project
+    //     if(onlyReference) { delete data[selectedID]; }
+    // }
     genericMoveUp(order: string[], selectedIDStore: Writable<string | null>) {
         const selectedID = get(selectedIDStore);
-        if(selectedID !== null && order.length > 1) {
-            const idIndex = order.findIndex(id => id === selectedID);
-            if(idIndex <= 0) { return; } // -1 should never occur
-            const temporary = order[idIndex];
-            order[idIndex] = order[idIndex-1];
-            order[idIndex-1] = temporary;
-        }
+        if(selectedID === null || order.length <= 1) { return; }
+
+        const idIndex = order.findIndex(id => id === selectedID);
+        if(idIndex <= 0) { return; } // -1 should never occur
+        const temporary = order[idIndex];
+        order[idIndex] = order[idIndex-1];
+        order[idIndex-1] = temporary;
     }
     genericMoveDown(order: string[], selectedIDStore: Writable<string | null>) {
         const selectedID = get(selectedIDStore);
-        if(selectedID !== null && order.length > 1) {
-            const idIndex = order.findIndex(id => id === selectedID);
-            if(idIndex === -1 || idIndex === order.length - 1) { return; } 
-            const temporary = order[idIndex];
-            order[idIndex] = order[idIndex+1];
-            order[idIndex+1] = temporary;
-        }
+        if(selectedID === null || order.length <= 1) { return; }
+
+        const idIndex = order.findIndex(id => id === selectedID);
+        if(idIndex === -1 || idIndex === order.length - 1) { return; } 
+        const temporary = order[idIndex];
+        order[idIndex] = order[idIndex+1];
+        order[idIndex+1] = temporary;
     }
 }
 

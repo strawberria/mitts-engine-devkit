@@ -18,12 +18,14 @@ export interface ProjectData {
             version:  string;
             synopsis: string;
         }
-        actions: string[];
-        images:  string[];
+        actions:  string[];
+        images:   string[];
+        states: string[];
     }
     data: {
-        actions: StoredData<ProjectActionData>;
-        images:  StoredData<ProjectImageData>;
+        actions:  StoredData<ProjectActionData>;
+        images:   StoredData<ProjectImageData>;
+        states: StoredData<ProjectStateData>;
     }
 }
 
@@ -40,9 +42,24 @@ export interface ProjectActionData extends ProjectConstruct {
 
 export interface ProjectImageData extends ProjectConstruct {
     imageb64:   string | null;
-    name:       string;
     devName:    string;
     resolution: [number, number] | null;
+}
+
+export type ProjectStateType = "normal" | "transition" | "ending";
+export interface ProjectHintData { attempts: number; text: string };
+export interface ProjectStateData extends ProjectConstruct {
+    devName:               string;
+    description:           string;
+    notes:                 string;
+    imageID:               string | null;
+    type:                  ProjectStateType;
+    args:                  any[]; // next state for transition?
+    availableActions:      string[];
+    availableInteractions: string[];
+    availableLocations:    string[];
+    hints:                 [ProjectHintData, ProjectHintData, ProjectHintData];
+    // locationIDs: string[];   
 }
 
 export interface SelectorRadioData {
@@ -53,4 +70,10 @@ export interface SelectorRadioData {
 
 export interface StoredData<T> {
     [id: string]: T
+}
+
+export interface SelectChoiceData {
+    key:     any;
+    display: string;
+    enabled: boolean;
 }

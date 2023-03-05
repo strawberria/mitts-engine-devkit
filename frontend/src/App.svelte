@@ -5,7 +5,7 @@
     import Metadata from "./tabs/Metadata.svelte";
     import Minimap from "./tabs/Minimap.svelte";
     import Objects from "./tabs/Objects.svelte";
-    import Progress from "./tabs/Progress.svelte";
+    import States from "./tabs/States.svelte";
     import Restraints from "./tabs/Restraints.svelte";
     import Storage from "./tabs/Storage.svelte";
     import type { NavigationTabData } from "./utilities/typings";
@@ -14,7 +14,7 @@
     const navigationTabsData: NavigationTabData = {
         "metadata": { display: "Metadata", component: Metadata },
         "storage": { display: "Storage", component: Storage },
-        "progress": { display: "Progress", component: Progress },
+        "states": { display: "States", component: States },
         "restraints": { display: "Restraints", component: Restraints },
         "objects": { display: "Objects", component: Objects },
         "interactions": { display: "Interactions", component: Interactions },

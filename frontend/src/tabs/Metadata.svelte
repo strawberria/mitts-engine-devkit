@@ -8,10 +8,10 @@
 
 <SectionRow height={100}>
     <SectionCol width={35}>
-        <MetadataActionSelector />
+        <MetadataActionSelector height={60}/>
         <MetadataSelectedAction />
     </SectionCol>
-    <SectionCol width={40}>
+    <SectionCol width={55}>
         <MetadataGameInformation />
     </SectionCol>
 </SectionRow>

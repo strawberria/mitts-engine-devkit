@@ -8,11 +8,12 @@
 
 <SectionRow height={100}>
     <SectionCol width={35}>
-        <StorageImageSelector />
+        <StorageImageSelector height={60} />
         <StorageSelectedImage />
     </SectionCol>
     <!-- Have to set width otherwise image expands -->
-    <SectionCol width={65}>
+    <!-- class="basis-0"  -->
+    <SectionCol style="width: calc(65% - 0.75em)">
         <StorageImagePreview />
     </SectionCol>
 </SectionRow>

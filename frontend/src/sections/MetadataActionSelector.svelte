@@ -5,6 +5,8 @@
     import { projectStore } from "../utilities/project";
     import type { ProjectActionData, SelectorRadioData } from "../utilities/typings";
 
+    export let height: number | null = null;
+
     let selectorRadioData: SelectorRadioData[] = [];
     projectStore.subscribe(projectData => {
         selectorRadioData = projectData.game.actions
@@ -27,7 +29,8 @@
     }
 </script>
 
-<SectionRadio height={60}
+<!-- allowUnlinking={false} -->
+<SectionRadio height={height}
     label="Game Actions"
     selectedIDStore={selectedActionIDStore}
     selectorRadioData={selectorRadioData}

@@ -5,6 +5,8 @@
     import { projectStore } from "../utilities/project";
     import type { ProjectImageData, SelectorRadioData } from "../utilities/typings";
 
+    export let height: number | null = null;
+
     let selectorRadioData: SelectorRadioData[] = [];
     projectStore.subscribe(projectData => {
         selectorRadioData = projectData.game.images
@@ -27,14 +29,13 @@
     }
 </script>
 
-<SectionRadio height={60}
-    label="Stored Images"
+<!-- allowUnlinking={false} -->
+<SectionRadio height={height}
+    label="Game Images"
     selectedIDStore={selectedImageIDStore}
     selectorRadioData={selectorRadioData}
-    allowDuplication={false}
-    allowUnlinking={false}
     order={$projectStore.game.images}
     data={$projectStore.data.images}
-    defaultValue={{ imageb64: null, name: "", devName: "", resolution: null }}
+    defaultValue={{ imageb64: null, devName: "", resolution: null }}
     on:dispatchClick={handleClick}>
 </SectionRadio>

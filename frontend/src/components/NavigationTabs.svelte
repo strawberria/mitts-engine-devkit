@@ -8,7 +8,7 @@
 
 <div class="relative grow">
     {#each Object.entries(navigationTabsData) as [navigationTabKey, navigationTabData]}
-        <div class="absolute inset-0 bg-slate-850 text-slate-300 p-3"
+        <div class="absolute inset-0 bg-slate-900 text-slate-300 p-3"
             class:shown={selectedTab === navigationTabKey}
             class:not-shown={selectedTab !== navigationTabKey}>
             <svelte:component this={navigationTabData.component} />
