@@ -15,8 +15,7 @@
                 id: id,
                 component: RadioAction,
                 props: { data: actionData }
-            })
-        );
+            }));
     });
 
     const deselectable = true;

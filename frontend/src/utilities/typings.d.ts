@@ -18,14 +18,18 @@ export interface ProjectData {
             version:  string;
             synopsis: string;
         }
-        actions:  string[];
-        images:   string[];
-        states: string[];
+        actions:            string[];
+        images:             string[];
+        states:             string[];
+        restraints:         string[];
+        restraintLocations: string[];
     }
     data: {
-        actions:  StoredData<ProjectActionData>;
-        images:   StoredData<ProjectImageData>;
-        states: StoredData<ProjectStateData>;
+        actions:            StoredData<ProjectActionData>;
+        images:             StoredData<ProjectImageData>;
+        states:             StoredData<ProjectStateData>;
+        restraints:         StoredData<ProjectRestraintData>;
+        restraintLocations: StoredData<ProjectRestraintLocationData>;
     }
 }
 
@@ -46,19 +50,32 @@ export interface ProjectImageData extends ProjectConstruct {
     resolution: [number, number] | null;
 }
 
+export interface ProjectRestraintLocationData extends ProjectConstruct {
+    name:               string;
+    initialRestraintID: string | null;
+}
+
+export interface ProjectRestraintData extends ProjectConstruct {
+    name:                string;
+    devName:             string;
+    restraintLocationID: string | null;
+    tags:                string[];
+    examine:             string;
+}
+
 export type ProjectStateType = "normal" | "transition" | "ending";
 export interface ProjectHintData { attempts: number; text: string };
 export interface ProjectStateData extends ProjectConstruct {
-    devName:               string;
-    description:           string;
-    notes:                 string;
-    imageID:               string | null;
-    type:                  ProjectStateType;
-    args:                  any[]; // next state for transition?
-    availableActions:      string[];
-    availableInteractions: string[];
-    availableLocations:    string[];
-    hints:                 [ProjectHintData, ProjectHintData, ProjectHintData];
+    devName:                 string;
+    description:             string;
+    notes:                   string;
+    imageID:                 string | null;
+    type:                    ProjectStateType;
+    args:                    any[]; // next state for transition?
+    availableActionIDs:      string[];
+    availableInteractionIDs: string[];
+    availableLocationIDs:    string[];
+    hints:                   [ProjectHintData, ProjectHintData, ProjectHintData];
     // locationIDs: string[];   
 }
 
@@ -66,7 +83,8 @@ export interface SelectorRadioData {
     id:        string;
     component: typeof SvelteComponentDev, 
     props:     any;
-};
+}
+export type SelectorMultipleData = SelectorRadioData;
 
 export interface StoredData<T> {
     [id: string]: T

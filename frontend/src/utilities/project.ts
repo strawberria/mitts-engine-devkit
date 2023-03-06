@@ -2,8 +2,8 @@ import _ from "lodash-es"
 import { Writable, get, writable } from "svelte/store";
 import { ExportProject, ImportProject } from "../../wailsjs/go/main/Bridge"
 import type { ProjectData, StoredData } from "./typings";
-import { engineVersion, randomIDLength, selectedActionIDStore, selectedImageIDStore, selectedStateIDStore } from "./constants";
-import { metadataValid, storageValid, statesValid } from "./validation";
+import { engineVersion, randomIDLength, selectedActionIDStore, selectedImageIDStore, selectedRestraintIDStore, selectedRestraintLocationIDStore, selectedStateIDStore } from "./constants";
+import { metadataValid, storageValid, statesValid, restraintsValid } from "./validation";
 
 export const projectStore: Writable<ProjectData> = writable<ProjectData>({
     custodial: {
@@ -19,11 +19,15 @@ export const projectStore: Writable<ProjectData> = writable<ProjectData>({
         actions: [],
         images: [],
         states: [],
+        restraintLocations: [],
+        restraints: [],
     },
     data: {
         actions: {},
         images: {},
         states: {},
+        restraintLocations: {},
+        restraints: {},
     }
 });
 
@@ -38,6 +42,7 @@ projectStore.subscribe(projectData => {
     [validData["metadata"], bundleValidData["metadata"]] = metadataValid(projectData);
     [validData["storage"], bundleValidData["storage"]] = storageValid(projectData);
     [validData["states"], bundleValidData["states"]] = statesValid(projectData);
+    [validData["restraints"], bundleValidData["restraints"]] = restraintsValid(projectData);
 
     bundleValidStore.set(bundleValidData);
     validStore.set(validData);
@@ -100,6 +105,8 @@ class MutateProject {
         selectedActionIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedImageIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedStateIDStore.update(d => resetIfValue(d, oldSelectedID));
+        selectedRestraintLocationIDStore.update(d => resetIfValue(d, oldSelectedID));
+        selectedRestraintIDStore.update(d => resetIfValue(d, oldSelectedID));
 
         // Only delete after trim to prevent hiccups
         delete data[oldSelectedID];

@@ -37,7 +37,8 @@ export function metadataValid(projectData: ProjectData): [boolean, any] {
         version: versionValid,
         synopsis: synopsisValid,
         actions: actionsValid,
-    }
+    };
+    
     const valid = recursiveCheckValid(bundled);
 
     return [valid, bundled];
@@ -54,7 +55,7 @@ export function storageValid(projectData: ProjectData): [boolean, any] {
 
     const bundled = {
         images: imagesValid,
-    }
+    };
 
     const valid = recursiveCheckValid(bundled);
 
@@ -68,12 +69,42 @@ export function statesValid(projectData: ProjectData): [boolean, any] {
             devName: stateData.devName !== "",
             description: stateData.description !== "",
             imageID: stateData.imageID !== null,
+            hints: Object.values(stateData.hints)
+                .map(hintData => hintData.attempts === -1 || hintData.text !== "")
         }
     }
 
     const bundled = {
         states: statesValid,
+    };
+
+    const valid = recursiveCheckValid(bundled);
+
+    return [valid, bundled];
+}
+
+export function restraintsValid(projectData: ProjectData): [boolean, any] {
+    const restraintLocationsValid = {};
+    for(const [id, restraintLocationData] of Object.entries(projectData.data.restraintLocations)) {
+        restraintLocationsValid[id] = {
+            name: restraintLocationData.name !== "",
+        }
     }
+
+    const restraintsValid = {}
+    for(const [id, restraintData] of Object.entries(projectData.data.restraints)) {
+        restraintsValid[id] = {
+            name: restraintData.name !== "",
+            devName: restraintData.devName !== "",
+            restraintLocationID: restraintData.restraintLocationID !== null,
+            examine: restraintData.examine !== "",
+        }
+    }
+
+    const bundled = {
+        restraintLocations: restraintLocationsValid,
+        restraints: restraintsValid,
+    };
 
     const valid = recursiveCheckValid(bundled);
 

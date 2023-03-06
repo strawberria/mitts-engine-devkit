@@ -3,7 +3,7 @@
     import NavigationTabs from "./components/NavigationTabs.svelte";
     import Interactions from "./tabs/Interactions.svelte";
     import Metadata from "./tabs/Metadata.svelte";
-    import Minimap from "./tabs/Minimap.svelte";
+    import Locations from "./tabs/Locations.svelte";
     import Objects from "./tabs/Objects.svelte";
     import States from "./tabs/States.svelte";
     import Restraints from "./tabs/Restraints.svelte";
@@ -18,7 +18,7 @@
         "restraints": { display: "Restraints", component: Restraints },
         "objects": { display: "Objects", component: Objects },
         "interactions": { display: "Interactions", component: Interactions },
-        "minimap": { display: "Minimap", component: Minimap },
+        "locations": { display: "Locations", component: Locations },
     };
     const initialTab: string = Object.keys(navigationTabsData)[0];
 
