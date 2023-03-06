@@ -31,7 +31,7 @@
 
 <SectionRow height={100}>
     <SectionCol width={35}>
-        <StorageImageSelector height={80} />
+        <StorageImageSelector height={70} />
         {#if $selectedImageIDStore !== null}
             <Section label="Selected Image">
                 <svelte:fragment slot="content">

@@ -110,3 +110,22 @@ export function restraintsValid(projectData: ProjectData): [boolean, any] {
 
     return [valid, bundled];
 }
+
+export function objectsValid(projectData: ProjectData): [boolean, any] {
+    const objectsValid = {};
+    for(const [id, objectData] of Object.entries(projectData.data.objects)) {
+        objectsValid[id] = {
+            name: objectData.name !== "",
+            devName: objectData.devName !== "",
+            examine: objectData.examine !== "",
+        }
+    }
+
+    const bundled = {
+        objects: objectsValid,
+    };
+
+    const valid = recursiveCheckValid(bundled);
+
+    return [valid, bundled];
+}

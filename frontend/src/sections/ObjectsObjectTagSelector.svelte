@@ -2,9 +2,9 @@
     import { writable, Writable } from "svelte/store";
     import IconButton from "../components/IconButton.svelte";
     import LabelTextInput from "../components/LabelTextInput.svelte";
-    import RadioRestraintTag from "../components/RadioRestraintTag.svelte";
+    import RadioObjectTag from "../components/RadioObjectTag.svelte";
     import SectionRadio from "../components/SectionRadio.svelte";
-    import { selectedRestraintIDStore } from "../utilities/constants";
+    import { selectedObjectIDStore } from "../utilities/constants";
     import { projectStore } from "../utilities/project";
     import type { SelectorRadioData } from "../utilities/typings";
 
@@ -13,34 +13,34 @@
     let selectorRadioData: SelectorRadioData[] = [];
     // Somehow subscribe not working
     projectStore.subscribe(_ => { 
-        if($selectedRestraintIDStore === null) { return; }
-        selectorRadioData = Object.entries($projectStore.data.restraints[$selectedRestraintIDStore].tags)
+        if($selectedObjectIDStore === null) { return; }
+        selectorRadioData = Object.entries($projectStore.data.objects[$selectedObjectIDStore].tags)
             .map(([index, tag]): SelectorRadioData => ({
                 id: index,
-                component: RadioRestraintTag,
+                component: RadioObjectTag,
                 props: { index: index, tag: tag }
             })); 
     });
 
     let dummyIDStore: Writable<string | null> = writable(null)
-    let restraintTagInput: string = "";
+    let objectTagInput: string = "";
     function submitAddTag() {
-        if(restraintTagInput === ""
-            || $projectStore.data.restraints[$selectedRestraintIDStore].tags
-                .indexOf(restraintTagInput) !== -1) { return; }
-        $projectStore.data.restraints[$selectedRestraintIDStore].tags.push(restraintTagInput);
+        if(objectTagInput === ""
+            || $projectStore.data.objects[$selectedObjectIDStore].tags
+                .indexOf(objectTagInput) !== -1) { return; }
+        $projectStore.data.objects[$selectedObjectIDStore].tags.push(objectTagInput);
         $projectStore = $projectStore;
-        restraintTagInput = "";
+        objectTagInput = "";
     }
     function submitDeleteTag(event) {
         const index = event.detail.index;
-        $projectStore.data.restraints[$selectedRestraintIDStore].tags.splice(index, 1);
+        $projectStore.data.objects[$selectedObjectIDStore].tags.splice(index, 1);
         $projectStore = $projectStore;
     }
 </script>
 
 <SectionRadio height={height} 
-    label="Restraint Tags"
+    label="Object Tags"
     nobuttons={true}
     noheader={true}
     overridepointer={true}
@@ -53,7 +53,7 @@
     <svelte:fragment slot="pre-content">
         <div class="flex flex-row w-full space-x-3 pb-2">
             <LabelTextInput class="grow"
-                bind:value={restraintTagInput}
+                bind:value={objectTagInput}
                 placeholder={"locked-star-key"}
                 on:submit={submitAddTag} />
             <IconButton label="Add"

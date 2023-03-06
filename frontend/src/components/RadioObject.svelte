@@ -2,11 +2,11 @@
     import { recursiveCheckValid } from "../utilities/validation";
     import { createEventDispatcher } from "svelte";
     import { bundleValidStore } from "../utilities/project";
-    import type { ProjectStateData } from "../utilities/typings";
+    import type { ProjectObjectData } from "../utilities/typings";
 
     export let id: string;
     export let selected: boolean;
-    export let data: ProjectStateData;
+    export let data: ProjectObjectData;
     let customClass: string;
     export { customClass as class };
 
@@ -15,7 +15,7 @@
 
     let valid = false;
     bundleValidStore.subscribe(_ => { 
-        valid = recursiveCheckValid($bundleValidStore.states.states[id]); 
+        valid = recursiveCheckValid($bundleValidStore.objects.objects[id]); 
     });
 </script>
 
@@ -32,10 +32,13 @@
         <p class="text-left w-11/12 min-w-0 truncate h-6">
             {data.devName}
         </p>
-        <p class={`text-left w-11/12 text-sm min-w-0 truncate h-5
-            ${selected === true ? "text-slate-400" : "text-slate-500"}`}>
-            {data.type}
-        </p>
+        <div class="flex flex-row text-sm items-end">
+            <p class="w-14 text-left font-semibold h-5">{data.initial ? "(Initial)" : ""}</p>
+            <p class={`text-left w-11/12 min-w-0 truncate h-5
+                ${selected === true ? "text-slate-400" : "text-slate-500"}`}>
+                {data.name}
+            </p>
+        </div>
     </div>
     <div class="grow" />
     <p class={`font-mono ${selected === true

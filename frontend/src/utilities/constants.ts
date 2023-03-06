@@ -8,3 +8,4 @@ export const selectedImageIDStore: Writable<string | null> = writable(null);
 export const selectedStateIDStore: Writable<string | null> = writable(null);
 export const selectedRestraintLocationIDStore: Writable<string | null> = writable(null);
 export const selectedRestraintIDStore: Writable<string | null> = writable(null);
+export const selectedObjectIDStore: Writable<string | null> = writable(null);

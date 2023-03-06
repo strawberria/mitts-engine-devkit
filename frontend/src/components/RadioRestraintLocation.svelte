@@ -32,7 +32,7 @@
         <p class="text-left w-11/12 min-w-0 truncate h-6">
             {data.name}
         </p>
-        <p class={`text-left w-11/12 text-xs min-w-0 truncate h-5
+        <p class={`text-left w-11/12 text-sm min-w-0 truncate h-5
             ${selected === true ? "text-slate-400" : "text-slate-500"}`}>
             {data.initialRestraintID !== null
                 ? $projectStore.data.restraints[data.initialRestraintID].devName

@@ -34,7 +34,7 @@
             </Section>
         {/if}
     </SectionCol>
-    <SectionCol width={55}>
+    <SectionCol width={40}>
         <Section label="Game Information">
             <svelte:fragment slot="content">
                 <LabelTextInput bind:value={$projectStore.game.metadata.title}

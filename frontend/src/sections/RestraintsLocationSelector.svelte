@@ -36,6 +36,6 @@
     selectorRadioData={selectorRadioData}
     order={$projectStore.game.restraintLocations}
     data={$projectStore.data.restraintLocations}
-    defaultValue={{ "name": "", initialRestraintID: null }}
+    defaultValue={{ "name": "", "initialRestraintID": null }}
     on:dispatchClick={handleClick}>
 </SectionRadio>

@@ -7,10 +7,11 @@
     import Section from "./Section.svelte";
     import SelectorRadio from "./SelectorRadio.svelte";
 
-    export let height = null;
-    export let width = null;
+    export let height: number | null = null;
+    export let width: number | null = null;
     export let nobuttons = false;
     export let noheader = false;
+    export let overridepointer = false;
     export let selectedIDStore: Writable<string | null> = writable(null);
     // export let allowUnlinking: boolean = true;
     export let selectorRadioData: SelectorRadioData[];
@@ -91,6 +92,7 @@
     <svelte:fragment slot="content">
         <SelectorRadio selectedID={$selectedIDStore}
             selectorRadioData={selectorRadioData}
+            overridepointer={overridepointer}
             on:dispatchClick={forward} />
     </svelte:fragment>
 </Section>

@@ -4,6 +4,7 @@
 
     export let selectedID: string | null;
     export let selectorRadioData: SelectorRadioData[];
+    export let overridepointer = false;
     
     const dispatch = createEventDispatcher();
     function forward(event: any) { dispatch("dispatchClick", event.detail); }
@@ -12,7 +13,7 @@
 {#each selectorRadioData as radioData}
     <svelte:component this={radioData.component}
         {...radioData.props}
-        class={"cursor-pointer select-none"}
+        class={!overridepointer ? "cursor-pointer select-none" : ""}
         id={radioData.id}
         selected={selectedID === radioData.id}
         on:dispatchClick={forward} />

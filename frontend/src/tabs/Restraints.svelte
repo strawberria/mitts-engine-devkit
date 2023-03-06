@@ -41,7 +41,7 @@
 
 <SectionRow height={100}>
     <SectionCol width={35}>
-        <RestraintsLocationSelector height={75}/>
+        <RestraintsLocationSelector height={70}/>
         {#if $selectedRestraintLocationIDStore !== null}
             <Section label="Selected Restraint Location">
                 <svelte:fragment slot="content">
@@ -58,7 +58,7 @@
         {/if}
     </SectionCol>
     <SectionCol style="width: calc(32.5% - 0.75em)">
-        <RestraintsRestraintSelector/>
+        <RestraintsRestraintSelector height={100} />
     </SectionCol>
     <SectionCol style="width: calc(32.5% - 0.75em)">
         {#if $selectedRestraintIDStore !== null}
@@ -84,7 +84,7 @@
                         valid={$bundleValidStore.restraints.restraints[$selectedRestraintIDStore].examine} />
                 </svelte:fragment>
             </Section>
-            <RestraintsRestraintTagSelector />
+            <RestraintsRestraintTagSelector height={50} />
         {/if}
     </SectionCol>
 </SectionRow>

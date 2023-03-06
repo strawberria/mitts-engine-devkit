@@ -2,8 +2,10 @@ import _ from "lodash-es"
 import { Writable, get, writable } from "svelte/store";
 import { ExportProject, ImportProject } from "../../wailsjs/go/main/Bridge"
 import type { ProjectData, StoredData } from "./typings";
-import { engineVersion, randomIDLength, selectedActionIDStore, selectedImageIDStore, selectedRestraintIDStore, selectedRestraintLocationIDStore, selectedStateIDStore } from "./constants";
-import { metadataValid, storageValid, statesValid, restraintsValid } from "./validation";
+import { engineVersion, randomIDLength, selectedActionIDStore, selectedImageIDStore, 
+    selectedRestraintIDStore, selectedRestraintLocationIDStore, selectedStateIDStore, 
+    selectedObjectIDStore } from "./constants";
+import { metadataValid, storageValid, statesValid, restraintsValid, objectsValid } from "./validation";
 
 export const projectStore: Writable<ProjectData> = writable<ProjectData>({
     custodial: {
@@ -21,6 +23,7 @@ export const projectStore: Writable<ProjectData> = writable<ProjectData>({
         states: [],
         restraintLocations: [],
         restraints: [],
+        objects: [],
     },
     data: {
         actions: {},
@@ -28,6 +31,7 @@ export const projectStore: Writable<ProjectData> = writable<ProjectData>({
         states: {},
         restraintLocations: {},
         restraints: {},
+        objects: {},
     }
 });
 
@@ -43,6 +47,7 @@ projectStore.subscribe(projectData => {
     [validData["storage"], bundleValidData["storage"]] = storageValid(projectData);
     [validData["states"], bundleValidData["states"]] = statesValid(projectData);
     [validData["restraints"], bundleValidData["restraints"]] = restraintsValid(projectData);
+    [validData["objects"], bundleValidData["objects"]] = objectsValid(projectData);
 
     bundleValidStore.set(bundleValidData);
     validStore.set(validData);
@@ -107,6 +112,7 @@ class MutateProject {
         selectedStateIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedRestraintLocationIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedRestraintIDStore.update(d => resetIfValue(d, oldSelectedID));
+        selectedObjectIDStore.update(d => resetIfValue(d, oldSelectedID));
 
         // Only delete after trim to prevent hiccups
         delete data[oldSelectedID];

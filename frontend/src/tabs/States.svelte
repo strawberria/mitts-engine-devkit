@@ -42,10 +42,12 @@
             }));
     });
 
-    const hintPlaceholderText: [string, string, string] = [
+    const hintPlaceholderText: [string, string, string, string, string] = [
         "That key seems slightly out of reach...",
         "Is there anything nearby you can use?",
-        "Use the [Broom] to [Pull] the key over",
+        "Use the [Broom] to [Pull] the key over.",
+        "What restraints can you currently reach?",
+        "Unlock the [Leather Cuffs] with the [Key].",
     ]
 </script>
 
@@ -101,7 +103,7 @@
                 nogrow={true}>
                 <svelte:fragment slot="content">
                     <p class="text-sm">Set hint required attempts to -1 to disable</p>
-                    {#each { length: 3 } as _, index}
+                    {#each { length: 5 } as _, index}
                         <div class="flex flex-row w-full space-x-3">
                             <LabelNumberInput class="w-16"
                                 bind:value={$projectStore.data.states[$selectedStateIDStore].hints[index].attempts}

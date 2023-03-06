@@ -23,6 +23,7 @@ export interface ProjectData {
         states:             string[];
         restraints:         string[];
         restraintLocations: string[];
+        objects:            string[];
     }
     data: {
         actions:            StoredData<ProjectActionData>;
@@ -30,6 +31,7 @@ export interface ProjectData {
         states:             StoredData<ProjectStateData>;
         restraints:         StoredData<ProjectRestraintData>;
         restraintLocations: StoredData<ProjectRestraintLocationData>;
+        objects:            StoredData<ProjectObjectData>;
     }
 }
 
@@ -63,6 +65,14 @@ export interface ProjectRestraintData extends ProjectConstruct {
     examine:             string;
 }
 
+export interface ProjectObjectData extends ProjectConstruct {
+    name:    string;
+    devName: string;
+    tags:    string[];
+    examine: string;
+    initial: boolean;
+}
+
 export type ProjectStateType = "normal" | "transition" | "ending";
 export interface ProjectHintData { attempts: number; text: string };
 export interface ProjectStateData extends ProjectConstruct {
@@ -75,7 +85,7 @@ export interface ProjectStateData extends ProjectConstruct {
     availableActionIDs:      string[];
     availableInteractionIDs: string[];
     availableLocationIDs:    string[];
-    hints:                   [ProjectHintData, ProjectHintData, ProjectHintData];
+    hints:                   [ProjectHintData, ProjectHintData, ProjectHintData, ProjectHintData, ProjectHintData];
     // locationIDs: string[];   
 }
 
