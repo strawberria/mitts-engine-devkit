@@ -15,7 +15,7 @@
     <SectionCol width={35}>
         <ObjectsObjectSelector height={100}/>
     </SectionCol>
-    <SectionCol width={35}>
+    <SectionCol style="width: calc(32.5% - 0.75em)">
         {#if $selectedObjectIDStore !== null}
             <Section nogrow={true} 
                 label="Selected Object">
@@ -28,20 +28,20 @@
                         label={"Name"}
                         placeholder={"Small Key"}
                         valid={$bundleValidStore.objects.objects[$selectedObjectIDStore].name} />
-                    <LabelToggle bind:value={$projectStore.data.objects[$selectedObjectIDStore].initial}
-                        label={"Initially Revealed"} />
                     <LabelTextArea bind:value={$projectStore.data.objects[$selectedObjectIDStore].examine}
                         rows={4}
                         label={"Examine Text"}
                         placeholder={"A small key with a star-shaped end - hopefully it fits at least one of the locks on your restraints."}
                         valid={$bundleValidStore.objects.objects[$selectedObjectIDStore].examine} />
+                    <LabelToggle bind:value={$projectStore.data.objects[$selectedObjectIDStore].initial}
+                        label={"Initially Revealed"} />
                 </svelte:fragment>
             </Section>
         {/if}
     </SectionCol>
-    <SectionCol width={35}>
+    <SectionCol style="width: calc(32.5% - 0.75em)">
         {#if $selectedObjectIDStore !== null}
-            <ObjectsObjectTagSelector height={50} />
+            <ObjectsObjectTagSelector height={60} />
         {/if}
     </SectionCol>
 </SectionRow>

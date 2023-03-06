@@ -54,7 +54,7 @@
         <div class="flex flex-row w-full space-x-3 pb-2">
             <LabelTextInput class="grow"
                 bind:value={restraintTagInput}
-                placeholder={"locked-star-key"}
+                placeholder={"locked-star_key"}
                 on:submit={submitAddTag} />
             <IconButton label="Add"
                 onclick={submitAddTag} />
