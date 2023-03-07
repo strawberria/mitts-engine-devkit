@@ -12,12 +12,12 @@
 </script>
 
 <SectionRow height={100}>
-    <SectionCol width={35}>
+    <SectionCol width={30}>
         <ObjectsObjectSelector height={100}/>
     </SectionCol>
-    <SectionCol style="width: calc(32.5% - 0.75em)">
+    <SectionCol style="width: calc(35% - 0.75em)">
         {#if $selectedObjectIDStore !== null}
-            <Section nogrow={true} 
+            <Section nogrow={true}
                 label="Selected Object">
                 <svelte:fragment slot="content">
                     <LabelTextInput bind:value={$projectStore.data.objects[$selectedObjectIDStore].devName}
@@ -37,11 +37,12 @@
                         label={"Initially Revealed"} />
                 </svelte:fragment>
             </Section>
+            {#if $selectedObjectIDStore !== null}
+                <ObjectsObjectTagSelector />
+            {/if}
         {/if}
     </SectionCol>
-    <SectionCol style="width: calc(32.5% - 0.75em)">
-        {#if $selectedObjectIDStore !== null}
-            <ObjectsObjectTagSelector height={60} />
-        {/if}
+    <SectionCol style="width: calc(35% - 0.75em)">
+        
     </SectionCol>
 </SectionRow>

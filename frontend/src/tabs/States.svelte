@@ -52,7 +52,7 @@
 </script>
 
 <SectionRow height={100}>
-    <SectionCol width={35}>
+    <SectionCol width={30}>
         <StatesStateSelector height={50} />
         {#if $selectedStateIDStore !== null}
             <Section label="Selected State">
@@ -80,7 +80,7 @@
             </Section>
         {/if}
     </SectionCol>
-    <SectionCol style="width: calc(32.5% - 0.75rem)">
+    <SectionCol style="width: calc(35% - 0.75rem)">
         {#if $selectedStateIDStore !== null}
             <SectionMultiple label="Available Actions"
                 selectedIDs={$projectStore.data.states[$selectedStateIDStore].availableActionIDs}
@@ -97,7 +97,7 @@
             </Section> 
         {/if}
     </SectionCol>
-    <SectionCol style="width: calc(32.5% - 0.75rem)">
+    <SectionCol style="width: calc(35% - 0.75rem)">
         {#if $selectedStateIDStore !== null}
             <Section label="Hints" 
                 nogrow={true}>

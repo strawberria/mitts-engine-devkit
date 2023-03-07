@@ -14,6 +14,7 @@
 
     let restraintLocationInitialChoiceData: SelectChoiceData[] = [];
     projectStore.subscribe(projectData => {
+        if($selectedRestraintLocationIDStore === null) { return; }
         restraintLocationInitialChoiceData = [
             { key: null, display: "", enabled: true },
             ...projectData.game.restraints
@@ -62,7 +63,8 @@
     </SectionCol>
     <SectionCol style="width: calc(32.5% - 0.75em)">
         {#if $selectedRestraintIDStore !== null}
-            <Section label="Selected Restraint">
+            <Section nogrow={true} 
+                label="Selected Restraint">
                 <svelte:fragment slot="content">
                     <LabelTextInput bind:value={$projectStore.data.restraints[$selectedRestraintIDStore].devName}
                         label={"Development Name"}
@@ -84,7 +86,7 @@
                         valid={$bundleValidStore.restraints.restraints[$selectedRestraintIDStore].examine} />
                 </svelte:fragment>
             </Section>
-            <RestraintsRestraintTagSelector height={50} />
+            <RestraintsRestraintTagSelector />
         {/if}
     </SectionCol>
 </SectionRow>

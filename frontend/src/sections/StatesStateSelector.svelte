@@ -31,14 +31,13 @@
 
 <!-- allowUnlinking={false} -->
 <SectionRadio height={height}
-    label="Game States"
+    label="States"
     selectedIDStore={selectedStateIDStore}
     selectorRadioData={selectorRadioData}
     order={$projectStore.game.states}
     data={$projectStore.data.states}
     defaultValue={{ "devName": "", "description": "", "notes": "", "imageID": null, "type": "normal", args: [],
-        "availableActionIDs": [], "availableInteractionIDs": [], "availableLocationIDs": [], 
-        "hints": [{ "attempts": -1, "text": "" }, { "attempts": -1, "text": "" }, { "attempts": -1, "text": "" },
-            { "attempts": -1, "text": "" }, { "attempts": -1, "text": "" }] }}
+        "availableActionIDs": [], "availableLocationIDs": [], "hints": [{ "attempts": -1, "text": "" }, 
+        { "attempts": -1, "text": "" }, { "attempts": -1, "text": "" }, { "attempts": -1, "text": "" }, { "attempts": -1, "text": "" }] }}
     on:dispatchClick={handleClick}>
 </SectionRadio>

@@ -4,8 +4,13 @@ import { ExportProject, ImportProject } from "../../wailsjs/go/main/Bridge"
 import type { ProjectData, StoredData } from "./typings";
 import { engineVersion, randomIDLength, selectedActionIDStore, selectedImageIDStore, 
     selectedRestraintIDStore, selectedRestraintLocationIDStore, selectedStateIDStore, 
-    selectedObjectIDStore } from "./constants";
-import { metadataValid, storageValid, statesValid, restraintsValid, objectsValid } from "./validation";
+    selectedObjectIDStore, 
+    selectedInteractionIDStore,
+    pulseImportStore,
+    selectedInteractionCriteriaIDStore,
+    selectedInteractionResultIDStore} from "./constants";
+import { metadataValid, storageValid, statesValid, restraintsValid, objectsValid,
+    interactionsValid } from "./validation";
 
 export const projectStore: Writable<ProjectData> = writable<ProjectData>({
     custodial: {
@@ -24,6 +29,7 @@ export const projectStore: Writable<ProjectData> = writable<ProjectData>({
         restraintLocations: [],
         restraints: [],
         objects: [],
+        interactions: [],
     },
     data: {
         actions: {},
@@ -32,6 +38,7 @@ export const projectStore: Writable<ProjectData> = writable<ProjectData>({
         restraintLocations: {},
         restraints: {},
         objects: {},
+        interactions: {},
     }
 });
 
@@ -48,6 +55,7 @@ projectStore.subscribe(projectData => {
     [validData["states"], bundleValidData["states"]] = statesValid(projectData);
     [validData["restraints"], bundleValidData["restraints"]] = restraintsValid(projectData);
     [validData["objects"], bundleValidData["objects"]] = objectsValid(projectData);
+    [validData["interactions"], bundleValidData["interactions"]] = interactionsValid(projectData);
 
     bundleValidStore.set(bundleValidData);
     validStore.set(validData);
@@ -60,6 +68,21 @@ class MutateProject {
         const rawProjectData = await ImportProject(); 
         const projectData: ProjectData = JSON.parse(rawProjectData);
         projectStore.set(projectData);
+
+        pulseImportStore.set(true);
+
+        selectedActionIDStore.set(null);
+        selectedImageIDStore.set(null);
+        selectedStateIDStore.set(null);
+        selectedRestraintLocationIDStore.set(null);
+        selectedRestraintIDStore.set(null);
+        selectedObjectIDStore.set(null);
+        selectedInteractionIDStore.set(null);
+        selectedInteractionCriteriaIDStore.set(null);
+        selectedInteractionResultIDStore.set(null);
+        
+        // Force unmount and remount - 16.66 okay for 60Hz
+        setTimeout(() => { pulseImportStore.set(false); }, 50);
     }
     async exportProject() {
         const rawProjectData = JSON.stringify(get(projectStore));
@@ -113,6 +136,9 @@ class MutateProject {
         selectedRestraintLocationIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedRestraintIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedObjectIDStore.update(d => resetIfValue(d, oldSelectedID));
+        selectedInteractionIDStore.update(d => resetIfValue(d, oldSelectedID));
+        selectedInteractionCriteriaIDStore.update(d => resetIfValue(d, oldSelectedID));
+        selectedInteractionResultIDStore.update(d => resetIfValue(d, oldSelectedID));
 
         // Only delete after trim to prevent hiccups
         delete data[oldSelectedID];

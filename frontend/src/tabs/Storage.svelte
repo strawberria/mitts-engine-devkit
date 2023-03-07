@@ -30,7 +30,7 @@
 </script>
 
 <SectionRow height={100}>
-    <SectionCol width={35}>
+    <SectionCol width={30}>
         <StorageImageSelector height={70} />
         {#if $selectedImageIDStore !== null}
             <Section label="Selected Image">
@@ -72,7 +72,7 @@
     </SectionCol>
     <!-- Have to set width otherwise image expands -->
     <!-- class="basis-0"  -->
-    <SectionCol style="width: calc(65% - 0.75em)">
+    <SectionCol style="width: calc(70% - 0.75em)">
         {#if $selectedImageIDStore !== null 
             && $projectStore.data.images[$selectedImageIDStore].imageb64 !== null}
             <Section class="h-full" 

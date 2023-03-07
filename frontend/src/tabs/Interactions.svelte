@@ -1,1 +1,158 @@
-Interactions
+<script lang="ts">
+    import InteractionsCriteriaSelector from "../sections/InteractionsCriteriaSelector.svelte";
+    import InteractionsInteractionSelector from "../sections/InteractionsInteractionSelector.svelte";
+    import InteractionsResultSelector from "../sections/InteractionsResultSelector.svelte";
+    import InteractionSelectedCriteria from "../sections/InteractionSelectedCriteria.svelte";
+    import InteractionSelectedResult from "../sections/InteractionSelectedResult.svelte";
+    import LabelSelect from "../components/LabelSelect.svelte";
+    import LabelTextInput from "../components/LabelTextInput.svelte";
+    import Section from "../components/Section.svelte";
+    import SectionCol from "../components/SectionCol.svelte";
+    import SectionRow from "../components/SectionRow.svelte";
+    import { selectedInteractionCriteriaIDStore, selectedInteractionIDStore, selectedInteractionResultIDStore } from "../utilities/constants";
+    import { bundleValidStore, projectStore } from "../utilities/project";
+    import type { ProjectActionData, ProjectInteractionCriteriaType, ProjectInteractionResultType, ProjectObjectData, ProjectRestraintData, ProjectStateData, SelectChoiceData } from "../utilities/typings";
+    import { writable, Writable } from "svelte/store";
+
+    let interactionActionChoiceData: SelectChoiceData[] = [];
+    projectStore.subscribe(projectData => {
+        interactionActionChoiceData = [
+            { key: null, display: "", enabled: true },
+            ...projectData.game.actions
+                .map((actionID): [string, ProjectActionData] => [actionID, projectData.data.actions[actionID]])
+                .map(([actionID, actionData]) => ({
+                    key: actionID,
+                    display: actionData.name,
+                    enabled: true,
+                }))
+        ];
+    });
+
+    let interactionStateChoiceData: SelectChoiceData[] = [];
+    projectStore.subscribe(projectData => {
+        interactionStateChoiceData = [
+            { key: null, display: "", enabled: true },
+            ...projectData.game.states
+                .map((stateID): [string, ProjectStateData] => [stateID, projectData.data.states[stateID]])
+                .map(([stateID, stateData]) => ({
+                    key: stateID,
+                    display: stateData.devName,
+                    enabled: true,
+                }))
+        ]
+    })
+
+    let interactionComponentChoiceData: [SelectChoiceData[], SelectChoiceData[]] = [[], []];
+    function updateinteractionComponentChoiceData() {
+        if($selectedInteractionIDStore === null) { return; }
+        for(const componentIndex in [0, 1]) {
+            if($projectStore.data.interactions[$selectedInteractionIDStore].componentTypes[componentIndex] === "restraints") {
+                interactionComponentChoiceData[componentIndex] = [
+                    { key: null, display: "", enabled: true },
+                    ...$projectStore.game.restraints
+                        .map((restraintID): [string, ProjectRestraintData] => [restraintID, $projectStore.data.restraints[restraintID]])
+                        .map(([restraintID, restraintData]): SelectChoiceData => ({
+                            key: restraintID, display: restraintData.devName, enabled: true
+                        })),
+                ];
+            } else {
+                interactionComponentChoiceData[componentIndex] = [
+                    { key: null, display: "", enabled: true },
+                    ...$projectStore.game.objects
+                        .map((objectID): [string, ProjectObjectData] => [objectID, $projectStore.data.objects[objectID]])
+                        .map(([objectID, objectData]): SelectChoiceData => ({
+                            key: objectID, display: objectData.devName, enabled: true
+                        })),
+                ];
+            }
+        }
+    }
+
+    projectStore.subscribe(updateinteractionComponentChoiceData);
+    selectedInteractionIDStore.subscribe(updateinteractionComponentChoiceData);
+
+    const interactionActionHasTwoStore: Writable<boolean> = writable(false);
+    projectStore.subscribe(projectData => {
+        $interactionActionHasTwoStore = $selectedInteractionIDStore !== null
+            ? projectData.data.interactions[$selectedInteractionIDStore].actionID !== null
+                ? projectData.data.actions[projectData.data.interactions[$selectedInteractionIDStore].actionID].two
+                : false
+            : false;
+        if($selectedInteractionIDStore !== null && !$interactionActionHasTwoStore
+            && $projectStore.data.interactions[$selectedInteractionIDStore].componentIDs[1] !== null) {
+            $projectStore.data.interactions[$selectedInteractionIDStore].componentIDs[1] = null;
+        }
+    });
+
+    const interactionComponentTypeChoiceData: SelectChoiceData[] = [
+        { key: "restraints", display: "Restraint", enabled: true },
+        { key: "objects", display: "Object", enabled: true },
+    ];
+</script>
+
+<SectionRow height={100}>
+    <SectionCol width={30}>
+        <InteractionsInteractionSelector height={60}/>
+        {#if $selectedInteractionIDStore !== null}
+            <Section label="Selected Interaction">
+                <svelte:fragment slot="content">
+                    <LabelTextInput bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].devName}
+                        label={"Development Name"}
+                        placeholder={"Unlock [Leather Cuffs] with [Small Key]"}
+                        valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].devName} />
+                    <div class="flex flex-row space-x-3">
+                        <LabelSelect class="w-1/3" 
+                            bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].actionID}
+                            choicesData={interactionActionChoiceData}
+                            label={"Action"}
+                            valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].actionID} />
+                        <LabelSelect class="grow" 
+                            bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].stateID}
+                            choicesData={interactionStateChoiceData}
+                            label={"Bound State (optional)"} />
+                    </div>
+                    <div class="flex flex-row space-x-3">
+                        <LabelSelect class="w-1/2" 
+                            bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentTypes[0]}
+                            choicesData={interactionComponentTypeChoiceData}
+                            label={"Component 1 Type"} />
+                        <LabelSelect class="w-1/2" 
+                            bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentTypes[1]}
+                            choicesData={interactionComponentTypeChoiceData}
+                            disabled={!$interactionActionHasTwoStore}
+                            label={"Component 2 Type"} />
+                    </div>
+                    <div class="flex flex-row space-x-3">
+                        <LabelSelect class="w-1/2" 
+                            bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentIDs[0]}
+                            choicesData={interactionComponentChoiceData[0]}
+                            label={"Component 1"}
+                            valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].componentIDs[0]} />
+                        <LabelSelect class="w-1/2" 
+                            bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentIDs[1]}
+                            choicesData={interactionComponentChoiceData[1]}
+                            label={"Component 2"}
+                            disabled={!$interactionActionHasTwoStore}
+                            valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].componentIDs[1]} />
+                    </div>
+                </svelte:fragment>
+            </Section>
+        {/if}
+    </SectionCol>
+    <SectionCol style="width: calc(35% - 0.75em)">
+        {#if $selectedInteractionIDStore !== null}
+            <InteractionsCriteriaSelector height={50} />
+            {#if $selectedInteractionCriteriaIDStore !== null}
+                <InteractionSelectedCriteria />
+            {/if}
+        {/if}
+    </SectionCol>
+    <SectionCol style="width: calc(35% - 0.75em)">
+        {#if $selectedInteractionIDStore !== null}
+            <InteractionsResultSelector height={50} />
+            {#if $selectedInteractionResultIDStore !== null}
+                <InteractionSelectedResult />
+            {/if}
+        {/if}
+    </SectionCol>
+</SectionRow>

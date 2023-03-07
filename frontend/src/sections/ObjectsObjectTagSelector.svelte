@@ -39,7 +39,8 @@
     }
 </script>
 
-<SectionRadio height={height} 
+<SectionRadio class="min-h-0" 
+    height={height} 
     label="Object Tags"
     nobuttons={true}
     noheader={true}

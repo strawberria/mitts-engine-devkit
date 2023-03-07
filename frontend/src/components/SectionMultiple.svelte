@@ -34,7 +34,7 @@
 <Section height={height}
     width={width}
     label={label}
-    class={customClass}
+    class={"min-h-0"}
     innerClass={`scrollbar-thin scrollbar-thumb-slate-700 overflow-x-hidden
         pr-4 
         ${innerClass}`}

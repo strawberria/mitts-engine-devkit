@@ -31,7 +31,7 @@
 
 <!-- allowUnlinking={false} -->
 <SectionRadio height={height}
-    label="Game Objects"
+    label="Objects"
     selectedIDStore={selectedObjectIDStore}
     selectorRadioData={selectorRadioData}
     order={$projectStore.game.objects}

@@ -27,7 +27,7 @@ export function metadataValid(projectData: ProjectData): [boolean, any] {
     for(const [id, actionData] of Object.entries(projectData.data.actions)) {
         actionsValid[id] = {
             name: actionData.name !== "",
-            verb: actionData.verb !== "",
+            verb: !actionData.two || actionData.verb !== "",
         };
     }
 
@@ -123,6 +123,68 @@ export function objectsValid(projectData: ProjectData): [boolean, any] {
 
     const bundled = {
         objects: objectsValid,
+    };
+
+    const valid = recursiveCheckValid(bundled);
+
+    return [valid, bundled];
+}
+
+function alsoNotUndefined(test, value) {
+    return test !== value && test !== undefined;
+}
+export function interactionsValid(projectData: ProjectData): [boolean, any] {
+    const interactionsValid = {};
+    for(const [id, interactionData] of Object.entries(projectData.data.interactions)) {
+        interactionsValid[id] = {
+            devName: interactionData.devName !== "",
+            actionID: interactionData.actionID !== null,
+            componentIDs: [interactionData.componentIDs[0] !== null, false],
+            criteria: {},
+            results: {}
+        };
+        if(interactionData.actionID !== null) {
+            const actionData = projectData.data.actions[interactionData.actionID];
+            interactionsValid[id].componentIDs[1] = !actionData.two 
+                || interactionData.componentIDs[1] !== null;
+        }
+
+        for(const [criteriaID, interactionCriteriaData] of Object.entries(interactionData.data.criteria)) {
+            interactionsValid[id].criteria[criteriaID] = {
+                devName: interactionCriteriaData.devName !== "",
+                args: [false, false, false, false, false], // Just in case
+            };
+            if(["flagEquals", "flagNotEquals"].includes(interactionCriteriaData.type)) {
+                interactionsValid[id].criteria[criteriaID].args[0] = alsoNotUndefined(interactionCriteriaData.args[0], "");
+                interactionsValid[id].criteria[criteriaID].args[1] = alsoNotUndefined(interactionCriteriaData.args[1], "");
+            } else if(["restraintWearing", "restraintNotWearing", "objectFound", "objectNotFound"]
+                .includes(interactionCriteriaData.type)) {
+                    interactionsValid[id].criteria[criteriaID].args[0] = alsoNotUndefined(interactionCriteriaData.args[0], null);
+            } else if(["restraintWearingTag", "restraintNotWearingTag", "objectFoundTag", "objectNotFoundTag"]
+                .includes(interactionCriteriaData.type)) {
+                    interactionsValid[id].criteria[criteriaID].args[0] = alsoNotUndefined(interactionCriteriaData.args[0], "");
+            }
+        }
+
+        for(const [resultID, interactionResultData] of Object.entries(interactionData.data.results)) {
+            interactionsValid[id].results[resultID] = {
+                devName: interactionResultData.devName !== "",
+                args: [false, false, false, false, false], // Just in case
+            };
+            if(["restraintAdd", "restraintRemove", "objectReveal", "objectHide", "setState", "locationAdd", "locationRemove"]
+                .includes(interactionResultData.type)) {
+                    interactionsValid[id].results[resultID].args[0] = alsoNotUndefined(interactionResultData.args[0], null);
+            } else if(["setFlag"].includes(interactionResultData.type)) {
+                    interactionsValid[id].results[resultID].args[0] = alsoNotUndefined(interactionResultData.args[0], "");
+                    interactionsValid[id].results[resultID].args[1] = alsoNotUndefined(interactionResultData.args[1], "");
+            } else if(["showDialog"].includes(interactionResultData.type)) {
+                    interactionsValid[id].results[resultID].args[0] = alsoNotUndefined(interactionResultData.args[0], "");
+            }
+        }
+    }
+
+    const bundled = {
+        interactions: interactionsValid,
     };
 
     const valid = recursiveCheckValid(bundled);

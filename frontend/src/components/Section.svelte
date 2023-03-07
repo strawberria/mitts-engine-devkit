@@ -20,9 +20,9 @@
     style={`${customStyle}; ` + (width !== null ? `width: ${width}%;` : "")
         + (height !== null ? `height: ${height}%;` : "")}>
     {#if label !== ""}
-        <div class="flex flex-row w-full
-            select-none
-            mb-2 mt-1 pl-4 pr-4">
+        <div class={`flex flex-row w-full
+            select-none mt-1 pl-4 pr-4
+            ${$$slots["pre-content"] ? "mb-1" : "mb-2"}`}>
             <p class={`text-xl ${$$slots.header && !noheader ? "" : "w-full"}`}>{label}</p>
             <div class="grow" />
             <slot name="header" />

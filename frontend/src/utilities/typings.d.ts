@@ -18,20 +18,22 @@ export interface ProjectData {
             version:  string;
             synopsis: string;
         }
-        actions:            string[];
-        images:             string[];
-        states:             string[];
-        restraints:         string[];
-        restraintLocations: string[];
-        objects:            string[];
+        actions:             string[];
+        images:              string[];
+        states:              string[];
+        restraints:          string[];
+        restraintLocations:  string[];
+        objects:             string[];
+        interactions:        string[];
     }
     data: {
-        actions:            StoredData<ProjectActionData>;
-        images:             StoredData<ProjectImageData>;
-        states:             StoredData<ProjectStateData>;
-        restraints:         StoredData<ProjectRestraintData>;
-        restraintLocations: StoredData<ProjectRestraintLocationData>;
-        objects:            StoredData<ProjectObjectData>;
+        actions:             StoredData<ProjectActionData>;
+        images:              StoredData<ProjectImageData>;
+        states:              StoredData<ProjectStateData>;
+        restraints:          StoredData<ProjectRestraintData>;
+        restraintLocations:  StoredData<ProjectRestraintLocationData>;
+        objects:             StoredData<ProjectObjectData>;
+        interactions:        StoredData<ProjectInteractionData>;
     }
 }
 
@@ -50,6 +52,21 @@ export interface ProjectImageData extends ProjectConstruct {
     imageb64:   string | null;
     devName:    string;
     resolution: [number, number] | null;
+}
+
+export type ProjectStateType = "normal" | "transition" | "ending";
+export interface ProjectHintData { attempts: number; text: string };
+export interface ProjectStateData extends ProjectConstruct {
+    devName:                 string;
+    description:             string;
+    notes:                   string;
+    imageID:                 string | null;
+    type:                    ProjectStateType;
+    args:                    any[]; // next state for transition?
+    availableActionIDs:      string[];
+    availableLocationIDs:    string[];
+    hints:                   [ProjectHintData, ProjectHintData, ProjectHintData, ProjectHintData, ProjectHintData];
+    // locationIDs: string[];   
 }
 
 export interface ProjectRestraintLocationData extends ProjectConstruct {
@@ -73,20 +90,39 @@ export interface ProjectObjectData extends ProjectConstruct {
     initial: boolean;
 }
 
-export type ProjectStateType = "normal" | "transition" | "ending";
-export interface ProjectHintData { attempts: number; text: string };
-export interface ProjectStateData extends ProjectConstruct {
-    devName:                 string;
-    description:             string;
-    notes:                   string;
-    imageID:                 string | null;
-    type:                    ProjectStateType;
-    args:                    any[]; // next state for transition?
-    availableActionIDs:      string[];
-    availableInteractionIDs: string[];
-    availableLocationIDs:    string[];
-    hints:                   [ProjectHintData, ProjectHintData, ProjectHintData, ProjectHintData, ProjectHintData];
-    // locationIDs: string[];   
+export interface ProjectInteractionData extends ProjectConstruct {
+    devName:        string;
+    actionID:       string | null;
+    stateID:        string | null;
+    componentTypes: ["restraints" | "objects", "restraints" | "objects"];
+    componentIDs:   [string | null, string | null];
+    order: {
+        criteria: string[];
+        results:  string[];
+    }
+    data: {
+        criteria: StoredData<ProjectInteractionCriteriaData>;
+        results:  StoredData<ProjectInteractionResultData>;
+    }
+}
+
+export type ProjectInteractionCriteriaType = "flagEquals" | "flagNotEquals" 
+    | "restraintWearing" | "restraintNotWearing" | "restraintWearingTag" 
+    | "restraintNotWearingTag" | "objectFound" | "objectNotFound"
+    | "objectFoundTag" | "objectNotFoundTag";
+export interface ProjectInteractionCriteriaData extends ProjectConstruct {
+    devName: string;
+    type:    ProjectInteractionCriteriaType;
+    args:    any[];
+}
+
+export type ProjectInteractionResultType = "restraintAdd" | "restraintRemove"
+    | "objectReveal" | "objectHide" | "setState" | "setFlag" | "showDialog"
+    | "locationAdd" | "locationRemove";
+export interface ProjectInteractionResultData extends ProjectConstruct {
+    devName: string;
+    type:    ProjectInteractionResultType;
+    args:    any[];
 }
 
 export interface SelectorRadioData {

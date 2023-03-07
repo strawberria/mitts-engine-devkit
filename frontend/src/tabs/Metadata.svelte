@@ -11,7 +11,7 @@
 </script>
 
 <SectionRow height={100}>
-    <SectionCol width={35}>
+    <SectionCol width={30}>
         <MetadataActionSelector height={60}/>
         {#if $selectedActionIDStore !== null}
             <Section label="Selected Action">

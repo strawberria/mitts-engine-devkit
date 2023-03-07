@@ -21,7 +21,7 @@
             after:rounded-full after:bg-slate-400 after:border after:border-slate-400 after:h-5 after:w-5 
             peer-checked:after:bg-slate-300 peer-checked:after:border-slate-300
             peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:transition-all 
-            peer-checked:bg-slate-600 
+            peer-checked:bg-slate-500 
             w-11 h-6"></div>
     </label>
 </div>
