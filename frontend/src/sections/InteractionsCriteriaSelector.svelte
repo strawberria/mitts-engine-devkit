@@ -22,7 +22,6 @@
     }
     projectStore.subscribe(updateSelectorRadioData);
     selectedInteractionIDStore.subscribe(updateSelectorRadioData);
-    selectedInteractionCriteriaIDStore.subscribe(updateSelectorRadioData);
 
     const deselectable = true;
     function handleClick(event: any) {

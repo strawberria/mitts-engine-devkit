@@ -11,7 +11,7 @@
     import SectionRow from "../components/SectionRow.svelte";
     import { selectedInteractionCriteriaIDStore, selectedInteractionIDStore, selectedInteractionResultIDStore } from "../utilities/constants";
     import { bundleValidStore, projectStore } from "../utilities/project";
-    import type { ProjectActionData, ProjectInteractionCriteriaType, ProjectInteractionResultType, ProjectObjectData, ProjectRestraintData, ProjectStateData, SelectChoiceData } from "../utilities/typings";
+    import type { ProjectActionData, ProjectObjectData, ProjectRestraintData, ProjectStateData, SelectChoiceData } from "../utilities/typings";
     import { writable, Writable } from "svelte/store";
 
     let interactionActionChoiceData: SelectChoiceData[] = [];

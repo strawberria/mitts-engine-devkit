@@ -41,6 +41,7 @@
 <SectionRadio height={height}
     style={style}
     label="Locations"
+    deleteCallback={() => { $selectedLocationObjectIDStore = null; }}
     selectedIDStore={selectedLocationIDStore}
     selectorRadioData={selectorRadioData}
     order={$projectStore.game.locations}

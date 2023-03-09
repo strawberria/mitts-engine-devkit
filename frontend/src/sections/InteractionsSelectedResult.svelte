@@ -8,28 +8,17 @@
     import { bundleValidStore, projectStore } from "../utilities/project";
     import type { ProjectInteractionResultType, ProjectObjectData, ProjectRestraintData, ProjectRestraintLocationData, ProjectStateData, SelectChoiceData } from "../utilities/typings";
 
-    let previousInteractionResultID: string | null = null;
-    let previousInteractionResultType: string | null = null;
     let interactionResultTypeStore: Writable<ProjectInteractionResultType> = writable("restraintAdd");
     function updateInteractionResultType() {
-        if($selectedInteractionIDStore === null || $selectedInteractionResultIDStore === null) { return; }
+        if($selectedInteractionIDStore === null || $selectedInteractionResultIDStore === null
+            || $projectStore.data.interactions[$selectedInteractionIDStore]
+                .data.results[$selectedInteractionResultIDStore] === undefined) { return; }
         $interactionResultTypeStore = $projectStore.data.interactions[$selectedInteractionIDStore]
             .data.results[$selectedInteractionResultIDStore].type;
-        previousInteractionResultID = $selectedInteractionIDStore;
     }
-    interactionResultTypeStore.subscribe((resultType) => {
-        if(previousInteractionResultType !== null
-            && resultType !== previousInteractionResultType
-            && $selectedInteractionIDStore === previousInteractionResultID) {
-            // Reset arguments after result type changed
-            $projectStore.data.interactions[$selectedInteractionIDStore]
-                .data.results[$selectedInteractionResultIDStore].args = [];
-        }
-        previousInteractionResultID = $selectedInteractionIDStore;
-        previousInteractionResultType = resultType;
-    });
-    selectedInteractionResultIDStore.subscribe(updateInteractionResultType);
     projectStore.subscribe(updateInteractionResultType);
+    selectedInteractionIDStore.subscribe(updateInteractionResultType);
+    selectedInteractionResultIDStore.subscribe(updateInteractionResultType);
 
     let resultLabelPlaceholderClass: { [key in ProjectInteractionResultType]: [string, string, string][] } = {
         "restraintAdd": [["Restraint", "", "w-2/3"]],
@@ -109,6 +98,11 @@
     projectStore.subscribe(updateResultSelectChoiceData);
     selectedInteractionResultIDStore.subscribe(updateResultSelectChoiceData);
     interactionResultTypeStore.subscribe(updateResultSelectChoiceData);
+
+    function clearInteractionResultArgs() {
+        $projectStore.data.interactions[$selectedInteractionIDStore]
+            .data.results[$selectedInteractionResultIDStore].args = [];
+    }
 </script>
 
 <!-- Necessary because in separate component -->
@@ -124,6 +118,7 @@
             <LabelSelect class="w-1/2" 
                 bind:value={$projectStore.data.interactions[$selectedInteractionIDStore]
                     .data.results[$selectedInteractionResultIDStore].type}
+                onchange={clearInteractionResultArgs}
                 choicesData={interactionResultChoiceData}
                 label={"State Type"} />
             <!-- Index 0 -->

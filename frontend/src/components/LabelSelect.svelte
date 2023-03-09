@@ -6,6 +6,7 @@
     export let value: any;
     export let disabled: boolean = false;
     export let choicesData: SelectChoiceData[];
+    export let onchange: () => void = () => {};
     export let valid: boolean = true;
     let customClass: string = "";
     export { customClass as class };
@@ -25,7 +26,7 @@
         ${disabled ? "cursor-not-allowed" : ""}`}
         bind:value={value}
         disabled={disabled}
-        on:change={() => { $projectStore = $projectStore; }}>
+        on:change={() => { $projectStore = $projectStore; onchange(); }}>
         {#each choicesData as choiceData}
             <option class={`bg-slate-775 ${choiceData.enabled === true
                     ? "text-slate-300"

@@ -141,17 +141,23 @@ class MutateProject {
         recursiveTrimID(projectData);
 
         // Reset any selected ID stores to null
-        function resetIfValue(data: string, value: string) { return data === value ? null : data; }
+        function resetIfValue(data: string, value: string, ...stores: Writable<any | null>[]) {
+            const shouldReset = data === value;
+            if(shouldReset) { stores.forEach(store => store.set(null)); }
+            return data === value ? null : data; 
+        }
         selectedActionIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedImageIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedStateIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedRestraintLocationIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedRestraintIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedObjectIDStore.update(d => resetIfValue(d, oldSelectedID));
-        selectedInteractionIDStore.update(d => resetIfValue(d, oldSelectedID));
+        selectedInteractionIDStore.update(d => resetIfValue(d, oldSelectedID, 
+            selectedInteractionCriteriaIDStore, selectedInteractionResultIDStore));
         selectedInteractionCriteriaIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedInteractionResultIDStore.update(d => resetIfValue(d, oldSelectedID));
-        selectedLocationIDStore.update(d => resetIfValue(d, oldSelectedID));
+        selectedLocationIDStore.update(d => resetIfValue(d, oldSelectedID, 
+            selectedLocationObjectIDStore));
         selectedLocationObjectIDStore.update(d => resetIfValue(d, oldSelectedID));
 
         // Only delete after trim to prevent hiccups

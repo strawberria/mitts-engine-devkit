@@ -16,7 +16,10 @@
 
     let valid = false;
     bundleValidStore.subscribe(_ => { 
-        if($selectedLocationIDStore === null) { return; }
+        if($selectedLocationIDStore === null 
+            || $bundleValidStore.locations.locations[$selectedLocationIDStore] === undefined) { 
+                return; 
+        }
         valid = recursiveCheckValid($bundleValidStore.locations.locations[$selectedLocationIDStore]
             .locationObjects[id]); 
     });
@@ -32,7 +35,7 @@
             ? "border-slate-600" : "border-red-900"))}`}
     on:click={handleClick}>
     <div class="flex flex-row items-center">
-        <p class="w-8 text-left font-bold font-mono">{data.type ? "C" : ""}</p>
+        <p class="text-left font-bold font-mono mr-4">{data.type ? "C" : ""}</p>
         <p class="text-left w-11/12 min-w-0 truncate h-6">
             {data.devName}
         </p>

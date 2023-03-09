@@ -16,7 +16,10 @@
 
     let valid = false;
     bundleValidStore.subscribe(_ => { 
-        if($selectedInteractionIDStore === null) { return; }
+        if($selectedInteractionIDStore === null 
+            || $bundleValidStore.interactions.interactions[$selectedInteractionIDStore] === undefined) { 
+                return; 
+        }
         valid = recursiveCheckValid($bundleValidStore.interactions
             .interactions[$selectedInteractionIDStore].criteria[id]); 
     });

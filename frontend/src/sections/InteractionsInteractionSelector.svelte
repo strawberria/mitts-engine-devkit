@@ -71,6 +71,7 @@
 <!-- allowUnlinking={false} -->
 <SectionRadio height={height}
     label="Interactions"
+    deleteCallback={() => { $selectedInteractionCriteriaIDStore = null; $selectedInteractionResultIDStore = null; }}
     selectedIDStore={selectedInteractionIDStore}
     selectorRadioData={selectorRadioData}
     order={$projectStore.game.interactions}

@@ -15,30 +15,6 @@
     import { bundleValidStore, projectStore } from "../utilities/project";
     import type { ProjectImageData, ProjectObjectData, SelectChoiceData } from "../utilities/typings";
 
-    let previousLocationObjectID: string | null = null;
-    let previousLocationObjectType: string | null = null;
-    let locationObjectTypeStore: Writable<"circle" | "vector"> = writable("circle");
-    function updateLocationObjectType() {
-        if($selectedLocationIDStore === null || $selectedLocationObjectIDStore === null) { return; }
-        $locationObjectTypeStore = $projectStore.data.locations[$selectedLocationIDStore]
-            .data.locationObjects[$selectedLocationObjectIDStore].type;
-        previousLocationObjectID = $selectedLocationObjectIDStore;
-    }
-    locationObjectTypeStore.subscribe((locationObjectType) => {
-        console.log(previousLocationObjectType, locationObjectType)
-        if(previousLocationObjectType !== null
-            && locationObjectType !== previousLocationObjectType
-            && $selectedLocationObjectIDStore === previousLocationObjectID) {
-                // Reset arguments after location object type changed
-                $projectStore.data.locations[$selectedLocationIDStore]
-                    .data.locationObjects[$selectedLocationObjectIDStore].args = [];
-        }
-        previousLocationObjectID = $selectedLocationObjectIDStore;
-        previousLocationObjectType = locationObjectType;
-    });
-    selectedLocationObjectIDStore.subscribe(updateLocationObjectType);
-    projectStore.subscribe(updateLocationObjectType);
-
     let locationImageChoiceData: SelectChoiceData[] = [];
     projectStore.subscribe(projectData => {
         locationImageChoiceData = [
@@ -71,7 +47,7 @@
         ];
     })
 
-    function clearMinimapObject() {
+    function clearMinimapObjectArgs() {
         $projectStore.data.locations[$selectedLocationIDStore].data.locationObjects
             [$selectedLocationObjectIDStore].args = [];
     }
@@ -119,7 +95,7 @@
                 nogrow={true}>
                 <svelte:fragment slot="header">
                     <IconButton label="Clear Hitbox"
-                        onclick={clearMinimapObject}>
+                        onclick={clearMinimapObjectArgs}>
                         <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>                  
@@ -131,10 +107,20 @@
                         label={"Development Name"}
                         placeholder={"Bedroom Door (locked)"}
                         valid={$bundleValidStore.locations.locations[$selectedLocationIDStore].locationObjects[$selectedLocationObjectIDStore].devName} />
-                    <LabelSelect class="w-2/3"
-                        bind:value={$projectStore.data.locations[$selectedLocationIDStore].data.locationObjects[$selectedLocationObjectIDStore].type}
-                        choicesData={locationObjectTypeChoiceData}
-                        label={"Minimap Object Type"} />
+                    <div class="flex flex-row w-full space-x-3">
+                        <LabelSelect class="w-2/3"
+                            bind:value={$projectStore.data.locations[$selectedLocationIDStore].data.locationObjects[$selectedLocationObjectIDStore].type}
+                            onchange={clearMinimapObjectArgs}
+                            choicesData={locationObjectTypeChoiceData}
+                            label={"Minimap Object Type"} />
+                        <!-- <div class="flex flex-col grow justify-center basis-0">
+                            {#if !$bundleValidStore.locations.locations[$selectedLocationIDStore].locationObjects[$selectedLocationObjectIDStore].args}
+                                <p class="h-6 pt-2 text-lg text-red-700">
+                                    data missing!
+                                </p>
+                            {/if}
+                        </div> -->
+                    </div>
                     <LabelSelect class="w-2/3"
                         bind:value={$projectStore.data.locations[$selectedLocationIDStore].data.locationObjects[$selectedLocationObjectIDStore].objectID}
                         choicesData={locationObjectObjectChoiceData}

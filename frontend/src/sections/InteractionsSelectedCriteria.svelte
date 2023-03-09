@@ -7,28 +7,17 @@
     import { bundleValidStore, projectStore } from "../utilities/project";
     import type { ProjectInteractionCriteriaType, ProjectObjectData, ProjectRestraintData, ProjectRestraintLocationData, SelectChoiceData } from "../utilities/typings";
 
-    let previousInteractionCriteriaID: string | null = null;
-    let previousInteractionCriteriaType: string | null = null;
     let interactionCriteriaTypeStore: Writable<ProjectInteractionCriteriaType> = writable("flagEquals");
     function updateInteractionCriteriaType() {
-        if($selectedInteractionIDStore === null || $selectedInteractionCriteriaIDStore === null) { return; }
+        if($selectedInteractionIDStore === null || $selectedInteractionCriteriaIDStore === null
+            || $projectStore.data.interactions[$selectedInteractionIDStore]
+                .data.criteria[$selectedInteractionCriteriaIDStore] === undefined) { return; }
         $interactionCriteriaTypeStore = $projectStore.data.interactions[$selectedInteractionIDStore]
             .data.criteria[$selectedInteractionCriteriaIDStore].type;
-        previousInteractionCriteriaID = $selectedInteractionIDStore;
     }
-    interactionCriteriaTypeStore.subscribe((criteriaType) => {
-        if(previousInteractionCriteriaType !== null
-            && criteriaType !== previousInteractionCriteriaType
-            && $selectedInteractionCriteriaIDStore === previousInteractionCriteriaID) {
-                // Reset arguments after criteria type changed
-                $projectStore.data.interactions[$selectedInteractionIDStore]
-                    .data.criteria[$selectedInteractionCriteriaIDStore].args = [];
-        }
-        previousInteractionCriteriaID = $selectedInteractionIDStore;
-        previousInteractionCriteriaType = criteriaType;
-    });
-    selectedInteractionCriteriaIDStore.subscribe(updateInteractionCriteriaType);
     projectStore.subscribe(updateInteractionCriteriaType);
+    selectedInteractionIDStore.subscribe(updateInteractionCriteriaType);
+    selectedInteractionCriteriaIDStore.subscribe(updateInteractionCriteriaType);
 
     let criteriaLabelPlaceholderClass: { [key in ProjectInteractionCriteriaType]: [string, string, string][] } = {
         "flagEquals": [["Flag Key", "doorStatus", "w-1/2"], ["Flag Value", "unlocked", "w-1/2"]],
@@ -92,6 +81,11 @@
     projectStore.subscribe(updateCriteriaSelectChoiceData);
     selectedInteractionCriteriaIDStore.subscribe(updateCriteriaSelectChoiceData);
     interactionCriteriaTypeStore.subscribe(updateCriteriaSelectChoiceData);
+
+    function clearInteractionCriteriaArgs() {
+        $projectStore.data.interactions[$selectedInteractionIDStore]
+            .data.criteria[$selectedInteractionCriteriaIDStore].args = [];
+    }
 </script>
 
 <!-- Necessary because in separate component -->
@@ -107,6 +101,7 @@
             <LabelSelect class="w-1/2" 
                 bind:value={$projectStore.data.interactions[$selectedInteractionIDStore]
                     .data.criteria[$selectedInteractionCriteriaIDStore].type}
+                onchange={clearInteractionCriteriaArgs}
                 choicesData={interactionCriteriaChoiceData}
                 label={"State Type"} />
             <!-- Index 0 -->

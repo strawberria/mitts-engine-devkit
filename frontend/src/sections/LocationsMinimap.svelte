@@ -130,6 +130,9 @@
                 const ratioY = Math.max(Math.floor(event.clientY - boundingRect.top), 0) / boundingRect.height;
 
                 selectedMinimapObjectData.args.push([ratioX, ratioY]);
+
+                // Force update
+                $projectStore = $projectStore;
         }
 
         // Render non-selected objects first
@@ -150,11 +153,6 @@
     selectedLocationIDStore.subscribe(() => { renderCanvas() });
     selectedLocationObjectIDStore.subscribe(() => { renderCanvas() });
     projectStore.subscribe(() => { renderCanvas() });
-
-    function clearCanvas() {
-        const selectedMinimapObjectData = $projectStore.data.locations[$selectedLocationIDStore]
-            .data.locationObjects[$selectedLocationObjectIDStore]; 
-    }
 </script>
 
 {#if $selectedLocationIDStore !== null}

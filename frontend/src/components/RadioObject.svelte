@@ -30,7 +30,7 @@
     on:click={handleClick}>
     <div class="flex flex-col w-full">
         <div class="flex flex-row items-center">
-            <p class="w-4 text-left font-bold font-mono">{data.initial ? "I" : ""}</p>
+            <p class="text-left font-bold font-mono mr-4">{data.initial ? "I" : ""}</p>
             <p class="text-left w-11/12 min-w-0 truncate h-6">
                 {data.devName}
             </p>
