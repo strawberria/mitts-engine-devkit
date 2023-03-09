@@ -11,7 +11,7 @@
     export { customClass as class, customStyle as style };
 </script>
 
-<div class={`w-full
+<div class={`w-full min-h-0
     flex flex-col items-center space-y-1
     pb-4 pl-3 pr-3 pt-2 rounded-md
     bg-slate-800
@@ -23,7 +23,9 @@
         <div class={`flex flex-row w-full
             select-none mt-1 pl-4 pr-4
             ${$$slots["pre-content"] ? "mb-1" : "mb-2"}`}>
-            <p class={`text-xl ${$$slots.header && !noheader ? "" : "w-full"}`}>{label}</p>
+            <div class={`flex flex-col justify-center ${$$slots.header && !noheader ? "" : "w-full"}`}>
+                <p class="text-xl">{label}</p>
+            </div>
             <div class="grow" />
             <slot name="header" />
         </div>

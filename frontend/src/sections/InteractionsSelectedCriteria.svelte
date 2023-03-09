@@ -12,16 +12,17 @@
     let interactionCriteriaTypeStore: Writable<ProjectInteractionCriteriaType> = writable("flagEquals");
     function updateInteractionCriteriaType() {
         if($selectedInteractionIDStore === null || $selectedInteractionCriteriaIDStore === null) { return; }
-        interactionCriteriaTypeStore.set($projectStore.data.interactions[$selectedInteractionIDStore]
-            .data.criteria[$selectedInteractionCriteriaIDStore].type);
+        $interactionCriteriaTypeStore = $projectStore.data.interactions[$selectedInteractionIDStore]
+            .data.criteria[$selectedInteractionCriteriaIDStore].type;
+        previousInteractionCriteriaID = $selectedInteractionIDStore;
     }
     interactionCriteriaTypeStore.subscribe((criteriaType) => {
         if(previousInteractionCriteriaType !== null
             && criteriaType !== previousInteractionCriteriaType
-            && $selectedInteractionIDStore === previousInteractionCriteriaID) {
-            // Reset arguments after criteria type changed
-            $projectStore.data.interactions[$selectedInteractionIDStore]
-                .data.criteria[$selectedInteractionCriteriaIDStore].args = [];
+            && $selectedInteractionCriteriaIDStore === previousInteractionCriteriaID) {
+                // Reset arguments after criteria type changed
+                $projectStore.data.interactions[$selectedInteractionIDStore]
+                    .data.criteria[$selectedInteractionCriteriaIDStore].args = [];
         }
         previousInteractionCriteriaID = $selectedInteractionIDStore;
         previousInteractionCriteriaType = criteriaType;
@@ -132,13 +133,13 @@
             <!-- Index 1 -->
             {#if ["flagEquals", "flagNotEquals"]
                 .includes($interactionCriteriaTypeStore)}
-                <LabelTextInput class={criteriaLabelPlaceholderClass[$interactionCriteriaTypeStore][1][2]}
-                    bind:value={$projectStore.data.interactions[$selectedInteractionIDStore]
-                        .data.criteria[$selectedInteractionCriteriaIDStore].args[1]}
-                    label={criteriaLabelPlaceholderClass[$interactionCriteriaTypeStore][1][0]}
-                    placeholder={criteriaLabelPlaceholderClass[$interactionCriteriaTypeStore][1][1]}
-                    valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].criteria
-                        [$selectedInteractionCriteriaIDStore].args[1]} />
+                    <LabelTextInput class={criteriaLabelPlaceholderClass[$interactionCriteriaTypeStore][1][2]}
+                        bind:value={$projectStore.data.interactions[$selectedInteractionIDStore]
+                            .data.criteria[$selectedInteractionCriteriaIDStore].args[1]}
+                        label={criteriaLabelPlaceholderClass[$interactionCriteriaTypeStore][1][0]}
+                        placeholder={criteriaLabelPlaceholderClass[$interactionCriteriaTypeStore][1][1]}
+                        valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].criteria
+                            [$selectedInteractionCriteriaIDStore].args[1]} />
             {/if}
         </svelte:fragment>
     </Section>

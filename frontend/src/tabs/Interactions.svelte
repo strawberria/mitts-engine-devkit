@@ -2,8 +2,8 @@
     import InteractionsCriteriaSelector from "../sections/InteractionsCriteriaSelector.svelte";
     import InteractionsInteractionSelector from "../sections/InteractionsInteractionSelector.svelte";
     import InteractionsResultSelector from "../sections/InteractionsResultSelector.svelte";
-    import InteractionSelectedCriteria from "../sections/InteractionSelectedCriteria.svelte";
-    import InteractionSelectedResult from "../sections/InteractionSelectedResult.svelte";
+    import InteractionsSelectedCriteria from "../sections/InteractionsSelectedCriteria.svelte";
+    import InteractionsSelectedResult from "../sections/InteractionsSelectedResult.svelte";
     import LabelSelect from "../components/LabelSelect.svelte";
     import LabelTextInput from "../components/LabelTextInput.svelte";
     import Section from "../components/Section.svelte";
@@ -143,7 +143,7 @@
         {#if $selectedInteractionIDStore !== null}
             <InteractionsCriteriaSelector height={50} />
             {#if $selectedInteractionCriteriaIDStore !== null}
-                <InteractionSelectedCriteria />
+                <InteractionsSelectedCriteria />
             {/if}
         {/if}
     </SectionCol>
@@ -151,7 +151,7 @@
         {#if $selectedInteractionIDStore !== null}
             <InteractionsResultSelector height={50} />
             {#if $selectedInteractionResultIDStore !== null}
-                <InteractionSelectedResult />
+                <InteractionsSelectedResult />
             {/if}
         {/if}
     </SectionCol>

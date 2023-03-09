@@ -8,9 +8,13 @@ import { engineVersion, randomIDLength, selectedActionIDStore, selectedImageIDSt
     selectedInteractionIDStore,
     pulseImportStore,
     selectedInteractionCriteriaIDStore,
-    selectedInteractionResultIDStore} from "./constants";
-import { metadataValid, storageValid, statesValid, restraintsValid, objectsValid,
-    interactionsValid } from "./validation";
+    selectedInteractionResultIDStore,
+    selectedLocationObjectIDStore,
+    selectedLocationIDStore,
+    selectedTabStore} from "./constants";
+import { metadataValid, imagesValid, statesValid, restraintsValid, objectsValid,
+    interactionsValid, 
+    locationsValid} from "./validation";
 
 export const projectStore: Writable<ProjectData> = writable<ProjectData>({
     custodial: {
@@ -30,6 +34,7 @@ export const projectStore: Writable<ProjectData> = writable<ProjectData>({
         restraints: [],
         objects: [],
         interactions: [],
+        locations: [],
     },
     data: {
         actions: {},
@@ -39,6 +44,7 @@ export const projectStore: Writable<ProjectData> = writable<ProjectData>({
         restraints: {},
         objects: {},
         interactions: {},
+        locations: {},
     }
 });
 
@@ -51,11 +57,12 @@ projectStore.subscribe(projectData => {
     const validData = get(validStore);
 
     [validData["metadata"], bundleValidData["metadata"]] = metadataValid(projectData);
-    [validData["storage"], bundleValidData["storage"]] = storageValid(projectData);
+    [validData["images"], bundleValidData["images"]] = imagesValid(projectData);
     [validData["states"], bundleValidData["states"]] = statesValid(projectData);
     [validData["restraints"], bundleValidData["restraints"]] = restraintsValid(projectData);
     [validData["objects"], bundleValidData["objects"]] = objectsValid(projectData);
     [validData["interactions"], bundleValidData["interactions"]] = interactionsValid(projectData);
+    [validData["locations"], bundleValidData["locations"]] = locationsValid(projectData);
 
     bundleValidStore.set(bundleValidData);
     validStore.set(validData);
@@ -67,7 +74,6 @@ class MutateProject {
     async importProject() {
         const rawProjectData = await ImportProject(); 
         const projectData: ProjectData = JSON.parse(rawProjectData);
-        projectStore.set(projectData);
 
         pulseImportStore.set(true);
 
@@ -80,9 +86,14 @@ class MutateProject {
         selectedInteractionIDStore.set(null);
         selectedInteractionCriteriaIDStore.set(null);
         selectedInteractionResultIDStore.set(null);
+        selectedLocationIDStore.set(null);
+        selectedLocationObjectIDStore.set(null);
         
         // Force unmount and remount - 16.66 okay for 60Hz
-        setTimeout(() => { pulseImportStore.set(false); }, 50);
+        setTimeout(() => { 
+            pulseImportStore.set(false);
+            projectStore.set(projectData);
+        }, 50);
     }
     async exportProject() {
         const rawProjectData = JSON.stringify(get(projectStore));
@@ -93,6 +104,7 @@ class MutateProject {
         const newID = randomID(randomIDLength);
         // Needed otherwise same reference
         const cloned = _.cloneDeep(defaultValue);
+        cloned.id = newID;
         data[newID] = cloned;
         order.push(newID);
 
@@ -115,13 +127,13 @@ class MutateProject {
         const projectData = get(projectStore);
         function recursiveTrimID(currentData: any) {
             // Array: iterate over data and either recursive trim or replace
-            for(const [index, data] of Object.entries(currentData)) {
+            for(const [key, data] of Object.entries(currentData)) {
                 if(typeof data === "object" && data !== null) {
                     // Object (dictionary) or array
                     recursiveTrimID(data); 
                 } else if(data == oldSelectedID) {
                     // Could cause issues with arrays?
-                    currentData[index] = Array.isArray(currentData)
+                    currentData[key] = Array.isArray(currentData)
                         ? undefined : null;
                 }
             }
@@ -139,6 +151,8 @@ class MutateProject {
         selectedInteractionIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedInteractionCriteriaIDStore.update(d => resetIfValue(d, oldSelectedID));
         selectedInteractionResultIDStore.update(d => resetIfValue(d, oldSelectedID));
+        selectedLocationIDStore.update(d => resetIfValue(d, oldSelectedID));
+        selectedLocationObjectIDStore.update(d => resetIfValue(d, oldSelectedID));
 
         // Only delete after trim to prevent hiccups
         delete data[oldSelectedID];
@@ -151,6 +165,7 @@ class MutateProject {
         const newID = randomID(randomIDLength);
         const existing = data[selectedID];
         const cloned = _.cloneDeep(existing);
+        cloned.id = newID;
         data[newID] = cloned;
         const idIndex = order.findIndex(id => id === selectedID);
         if(idIndex < 0) { return; } // should never occur

@@ -44,7 +44,7 @@ export function metadataValid(projectData: ProjectData): [boolean, any] {
     return [valid, bundled];
 }
 
-export function storageValid(projectData: ProjectData): [boolean, any] {
+export function imagesValid(projectData: ProjectData): [boolean, any] {
     const imagesValid = {};
     for(const [id, imageData] of Object.entries(projectData.data.images)) {
         imagesValid[id] = {
@@ -185,6 +185,35 @@ export function interactionsValid(projectData: ProjectData): [boolean, any] {
 
     const bundled = {
         interactions: interactionsValid,
+    };
+
+    const valid = recursiveCheckValid(bundled);
+
+    return [valid, bundled];
+}
+
+export function locationsValid(projectData: ProjectData): [boolean, any] {
+    const locationsValid = {};
+    for(const [id, locationData] of Object.entries(projectData.data.locations)) {
+        locationsValid[id] = {
+            name: locationData.name !== "",
+            devName: locationData.devName !== "",
+            imageID: locationData.imageID !== null,
+            locationObjects: {}
+        };
+
+        for(const [locationObjectID, locationObjectData] of Object.entries(locationData.data.locationObjects)) {
+            locationsValid[id].locationObjects[locationObjectID] = {
+                devName: locationObjectData.devName !== "",
+                args: locationObjectData.type === "circle"
+                    ? locationObjectData.args.length == 2 
+                    : locationObjectData.args.length >= 3,
+            };
+        }
+    }
+
+    const bundled = {
+        locations: locationsValid,
     };
 
     const valid = recursiveCheckValid(bundled);

@@ -13,8 +13,9 @@
     let interactionResultTypeStore: Writable<ProjectInteractionResultType> = writable("restraintAdd");
     function updateInteractionResultType() {
         if($selectedInteractionIDStore === null || $selectedInteractionResultIDStore === null) { return; }
-        interactionResultTypeStore.set($projectStore.data.interactions[$selectedInteractionIDStore]
-            .data.results[$selectedInteractionResultIDStore].type);
+        $interactionResultTypeStore = $projectStore.data.interactions[$selectedInteractionIDStore]
+            .data.results[$selectedInteractionResultIDStore].type;
+        previousInteractionResultID = $selectedInteractionIDStore;
     }
     interactionResultTypeStore.subscribe((resultType) => {
         if(previousInteractionResultType !== null

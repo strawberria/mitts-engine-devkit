@@ -1,18 +1,17 @@
 <script lang="ts">
-    import { pulseImportStore } from "../utilities/constants";
+    import { pulseImportStore, selectedTabStore } from "../utilities/constants";
     import type { NavigationTabData } from "../utilities/typings";
 
     // By default, show the first tab on startup
     export let navigationTabsData: NavigationTabData;
-    export let selectedTab: string;
 </script>
 
 {#if !$pulseImportStore}
     <div class="relative grow">
         {#each Object.entries(navigationTabsData) as [navigationTabKey, navigationTabData]}
             <div class="absolute inset-0 bg-slate-900 text-slate-300 p-3"
-                class:shown={selectedTab === navigationTabKey}
-                class:not-shown={selectedTab !== navigationTabKey}>
+                class:shown={$selectedTabStore === navigationTabKey}
+                class:not-shown={$selectedTabStore !== navigationTabKey}>
                 <svelte:component this={navigationTabData.component} />
             </div>
         {/each}

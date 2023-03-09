@@ -53,17 +53,18 @@
     const deselectable = true;
     let previousInteractionID: string | null = null;
     function handleClick(event: any) {
-        const resultInteractionID = $selectedInteractionIDStore !== event.detail.id 
-            || !deselectable
-                ? event.detail.id : null;
+        const resultInteractionID = $selectedInteractionIDStore !== event.detail.id
+            ? event.detail.id : deselectable
+                ? null : $selectedInteractionIDStore;
 
         if(previousInteractionID !== resultInteractionID) {
-            selectedInteractionCriteriaIDStore.set(null);
-            selectedInteractionResultIDStore.set(null);
+            $selectedInteractionCriteriaIDStore = null;
+            $selectedInteractionResultIDStore = null;
         }
 
         $selectedInteractionIDStore = resultInteractionID;
-        previousInteractionID = event.detail.id;
+        // previousInteractionID = event.detail.id;
+        previousInteractionID = resultInteractionID;
     }
 </script>
 

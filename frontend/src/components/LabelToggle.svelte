@@ -7,7 +7,7 @@
 
 <div class={`flex flex-col items-start space-y-0.5
     ${customClass}`}>
-    <p class="pl-1 mb-1 
+    <p class="pl-1 mb-0.5 
         text-slate-400 text-sm select-none">
         {label}
     </p>

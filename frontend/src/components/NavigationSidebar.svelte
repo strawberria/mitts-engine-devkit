@@ -1,11 +1,10 @@
 <script lang="ts">
-    import { engineVersion } from "../utilities/constants";
+    import { engineVersion, selectedTabStore } from "../utilities/constants";
     import { mutate, validStore } from "../utilities/project";
     import type { NavigationTabData } from "../utilities/typings";
     import IconButton from "./IconButton.svelte";
 
     export let navigationTabsData: NavigationTabData = {};
-    export let selectedTab: string;
 </script>
 
 <div class="h-full w-60
@@ -28,10 +27,10 @@
         <div class={`w-full pl-4 pr-2 pt-1 pb-1
             text-l text-left flex flex-row
             cursor-pointer select-none
-            ${selectedTab === navigationTabKey
+            ${$selectedTabStore === navigationTabKey
                 ? "text-slate-200 bg-slate-600"
                 : "text-slate-350 hover:text-slate-300 hover:bg-slate-700"}`}
-            on:click={() => { selectedTab = navigationTabKey; }}>
+            on:click={() => { $selectedTabStore = navigationTabKey; }}>
                 <p>{navigationTabData.display}</p>
                 <div class="grow" />
                 {#if !$validStore[navigationTabKey]}

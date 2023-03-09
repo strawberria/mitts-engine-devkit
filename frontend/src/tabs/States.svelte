@@ -48,7 +48,7 @@
         "Use the [Broom] to [Pull] the key over.",
         "What restraints can you currently reach?",
         "Unlock the [Leather Cuffs] with the [Key].",
-    ]
+    ];
 </script>
 
 <SectionRow height={100}>

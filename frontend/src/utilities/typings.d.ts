@@ -25,6 +25,7 @@ export interface ProjectData {
         restraintLocations:  string[];
         objects:             string[];
         interactions:        string[];
+        locations:           string[];
     }
     data: {
         actions:             StoredData<ProjectActionData>;
@@ -34,6 +35,7 @@ export interface ProjectData {
         restraintLocations:  StoredData<ProjectRestraintLocationData>;
         objects:             StoredData<ProjectObjectData>;
         interactions:        StoredData<ProjectInteractionData>;
+        locations:           StoredData<ProjectLocationData>;
     }
 }
 
@@ -99,11 +101,11 @@ export interface ProjectInteractionData extends ProjectConstruct {
     order: {
         criteria: string[];
         results:  string[];
-    }
+    };
     data: {
         criteria: StoredData<ProjectInteractionCriteriaData>;
         results:  StoredData<ProjectInteractionResultData>;
-    }
+    };
 }
 
 export type ProjectInteractionCriteriaType = "flagEquals" | "flagNotEquals" 
@@ -123,6 +125,29 @@ export interface ProjectInteractionResultData extends ProjectConstruct {
     devName: string;
     type:    ProjectInteractionResultType;
     args:    any[];
+}
+
+export interface ProjectLocationData extends ProjectConstruct {
+    name:    string;
+    devName: string;
+    initial: boolean;
+    imageID: string | null;
+    order: {
+        locationObjects: string[];
+    };
+    data: {
+        locationObjects: StoredData<ProjectLocationObjectData>;
+    };
+}
+
+export type ProjectLocationObjectType = "circle" | "vector";
+export interface ProjectLocationObjectData extends ProjectConstruct {
+    devName:  string;
+    type:     ProjectLocationObjectType;
+    args:     [number, number][];
+    dialog:   string;
+    objectID: string | null;
+    // no interactionID because hassle
 }
 
 export interface SelectorRadioData {

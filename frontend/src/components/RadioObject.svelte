@@ -29,16 +29,16 @@
             ? "border-slate-600" : "border-red-900"))}`}
     on:click={handleClick}>
     <div class="flex flex-col w-full">
-        <p class="text-left w-11/12 min-w-0 truncate h-6">
-            {data.devName}
-        </p>
-        <div class="flex flex-row text-sm items-end">
-            <p class="w-14 text-left font-semibold h-5">{data.initial ? "(Initial)" : ""}</p>
-            <p class={`text-left w-11/12 min-w-0 truncate h-5
-                ${selected === true ? "text-slate-400" : "text-slate-500"}`}>
-                {data.name}
+        <div class="flex flex-row items-center">
+            <p class="w-4 text-left font-bold font-mono">{data.initial ? "I" : ""}</p>
+            <p class="text-left w-11/12 min-w-0 truncate h-6">
+                {data.devName}
             </p>
         </div>
+        <p class={`text-left text-sm w-11/12 min-w-0 truncate h-5
+            ${selected === true ? "text-slate-400" : "text-slate-500"}`}>
+            {data.name}
+        </p>
     </div>
     <div class="grow" />
     <p class={`font-mono ${selected === true

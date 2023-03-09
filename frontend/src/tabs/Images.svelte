@@ -4,7 +4,7 @@
     import Section from "../components/Section.svelte";
     import SectionCol from "../components/SectionCol.svelte";
     import SectionRow from "../components/SectionRow.svelte";
-    import StorageImageSelector from "../sections/StorageImageSelector.svelte";
+    import ImagesImageSelector from "../sections/ImagesImageSelector.svelte";
     import { LoadImage } from "../../wailsjs/go/main/Bridge";
     import { selectedImageIDStore } from "../utilities/constants";
     import { bundleValidStore, projectStore } from "../utilities/project";
@@ -31,7 +31,7 @@
 
 <SectionRow height={100}>
     <SectionCol width={30}>
-        <StorageImageSelector height={70} />
+        <ImagesImageSelector height={70} />
         {#if $selectedImageIDStore !== null}
             <Section label="Selected Image">
                 <svelte:fragment slot="content">
@@ -39,12 +39,12 @@
                         bind:value={$projectStore.data.images[$selectedImageIDStore].devName}
                         label={"Development Name"}
                         placeholder={"Bedroom (darkened)"}
-                        valid={$bundleValidStore.storage.images[$selectedImageIDStore].devName} />
+                        valid={$bundleValidStore.images.images[$selectedImageIDStore].devName} />
                     <div class="flex flex-row items-center space-x-4 w-full h-12">
                         <div class="flex flex-row space-x-2">
                             <!-- hacky h-10 to ensure buttons are same height -->
                             <IconButton label="Upload"
-                                class={`h-10 w-22 border border-red-700 ${$bundleValidStore.storage.images[$selectedImageIDStore].imageb64
+                                class={`h-10 w-22 border border-red-700 ${$bundleValidStore.images.images[$selectedImageIDStore].imageb64
                                     ? "border-opacity-0" : ""}`}
                                 onclick={uploadImage}>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
