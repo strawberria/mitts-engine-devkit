@@ -16,7 +16,8 @@
     const stateTypeChoiceData: SelectChoiceData[] = [
         { key: "normal", display: "Normal", enabled: true },
         { key: "transition", display: "Transition", enabled: true },
-        { key: "ending", display: "Ending", enabled: true },
+        { key: "gpodEnding", display: "Good Ending", enabled: true },
+        { key: "badEnding", display: "Bad Ending", enabled: true },
     ];
 
     let stateImageChoiceData: SelectChoiceData[] = [];
@@ -99,10 +100,14 @@
     </SectionCol>
     <SectionCol style="width: calc(35% - 0.75rem)">
         {#if $selectedStateIDStore !== null}
+            <Section nogrow={true}>
+                <svelte:fragment slot="content">
+                    <p>Tip: Set hint required attempts to -1 to disable each hint</p>
+                </svelte:fragment>
+            </Section>
             <Section label="Hints" 
                 nogrow={true}>
                 <svelte:fragment slot="content">
-                    <p class="text-sm">Set hint required attempts to -1 to disable</p>
                     {#each { length: 5 } as _, index}
                         <div class="flex flex-row w-full space-x-3">
                             <LabelNumberInput class="w-16"
@@ -120,6 +125,15 @@
                 </svelte:fragment>
             </Section>
             <!-- <Section /> -->
+            <div class="grow" />
+
+            <Section nogrow={true}>
+                <svelte:fragment slot="content">
+                    <p>
+                        Tip: Duplicate states whenever possible to save development effort (much less typing, trust me!)
+                    </p>
+                </svelte:fragment>
+            </Section>
         {/if}
     </SectionCol>
 </SectionRow>

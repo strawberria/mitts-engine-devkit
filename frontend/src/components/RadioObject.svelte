@@ -14,9 +14,11 @@
     function handleClick() { dispatch("dispatchClick", { id: id }); }
 
     let valid = false;
-    bundleValidStore.subscribe(_ => { 
+    function updateValid() {
         valid = recursiveCheckValid($bundleValidStore.objects.objects[id]); 
-    });
+    }
+    bundleValidStore.subscribe(updateValid);
+    $: { id; data; updateValid(); }
 </script>
 
 <div class={`flex flex-row space-x-1
@@ -30,7 +32,7 @@
     on:click={handleClick}>
     <div class="flex flex-col w-full">
         <div class="flex flex-row items-center">
-            <p class="text-left font-bold font-mono mr-4">{data.initial ? "I" : ""}</p>
+            <p class="text-left font-bold font-mono mr-2 w-2">{data.initial ? "I" : ""}</p>
             <p class="text-left w-11/12 min-w-0 truncate h-6">
                 {data.devName}
             </p>

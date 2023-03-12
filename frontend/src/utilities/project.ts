@@ -4,14 +4,9 @@ import { ExportProject, ImportProject } from "../../wailsjs/go/main/Bridge"
 import type { ProjectData, StoredData } from "./typings";
 import { engineVersion, randomIDLength, selectedActionIDStore, selectedImageIDStore, 
     selectedRestraintIDStore, selectedRestraintLocationIDStore, selectedStateIDStore, 
-    selectedObjectIDStore, 
-    selectedInteractionIDStore,
-    pulseImportStore,
-    selectedInteractionCriteriaIDStore,
-    selectedInteractionResultIDStore,
-    selectedLocationObjectIDStore,
-    selectedLocationIDStore,
-    selectedTabStore} from "./constants";
+    selectedObjectIDStore, selectedInteractionIDStore, pulseImportStore,
+    selectedInteractionCriteriaIDStore, selectedInteractionResultIDStore,
+    selectedLocationObjectIDStore, selectedLocationIDStore } from "./constants";
 import { metadataValid, imagesValid, statesValid, restraintsValid, objectsValid,
     interactionsValid, 
     locationsValid} from "./validation";
@@ -73,9 +68,16 @@ let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 class MutateProject {
     async importProject() {
         const rawProjectData = await ImportProject(); 
+        if(rawProjectData === "") { return; }
         const projectData: ProjectData = JSON.parse(rawProjectData);
 
         pulseImportStore.set(true);
+
+        selectedInteractionCriteriaIDStore.set(null);
+        selectedInteractionResultIDStore.set(null);
+        selectedLocationObjectIDStore.set(null);
+        
+        await sleep(50);
 
         selectedActionIDStore.set(null);
         selectedImageIDStore.set(null);
@@ -84,16 +86,12 @@ class MutateProject {
         selectedRestraintIDStore.set(null);
         selectedObjectIDStore.set(null);
         selectedInteractionIDStore.set(null);
-        selectedInteractionCriteriaIDStore.set(null);
-        selectedInteractionResultIDStore.set(null);
         selectedLocationIDStore.set(null);
-        selectedLocationObjectIDStore.set(null);
-        
-        // Force unmount and remount - 16.66 okay for 60Hz
-        setTimeout(() => { 
-            pulseImportStore.set(false);
-            projectStore.set(projectData);
-        }, 50);
+
+        await sleep(50);
+
+        pulseImportStore.set(false);
+        projectStore.set(projectData);
     }
     async exportProject() {
         const rawProjectData = JSON.stringify(get(projectStore));
@@ -107,6 +105,9 @@ class MutateProject {
         cloned.id = newID;
         data[newID] = cloned;
         order.push(newID);
+
+        // Set to new ID, not everyone will like?
+        selectedIDStore.set(newID);
 
         // const selectedID = get(selectedIDStore);
         // if(selectedID === null) { selectedIDStore.set(newID); }
@@ -232,6 +233,10 @@ class MutateProject {
         order[idIndex] = order[idIndex+1];
         order[idIndex+1] = temporary;
     }
+}
+
+function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function randomID(length: number): string {

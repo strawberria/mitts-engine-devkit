@@ -11,7 +11,7 @@
     import SectionRow from "../components/SectionRow.svelte";
     import { selectedInteractionCriteriaIDStore, selectedInteractionIDStore, selectedInteractionResultIDStore } from "../utilities/constants";
     import { bundleValidStore, projectStore } from "../utilities/project";
-    import type { ProjectActionData, ProjectObjectData, ProjectRestraintData, ProjectStateData, SelectChoiceData } from "../utilities/typings";
+    import type { ProjectActionData, ProjectObjectData, ProjectRestraintData, ProjectRestraintLocationData, ProjectStateData, SelectChoiceData } from "../utilities/typings";
     import { writable, Writable } from "svelte/store";
 
     let interactionActionChoiceData: SelectChoiceData[] = [];
@@ -45,23 +45,37 @@
     let interactionComponentChoiceData: [SelectChoiceData[], SelectChoiceData[]] = [[], []];
     function updateinteractionComponentChoiceData() {
         if($selectedInteractionIDStore === null) { return; }
-        for(const componentIndex in [0, 1]) {
+        for(const componentIndex of [0, 1]) {
+            // Hacky solution but hey... it works I guess
+            if($projectStore.data.interactions[$selectedInteractionIDStore] === undefined) { return; }
             if($projectStore.data.interactions[$selectedInteractionIDStore].componentTypes[componentIndex] === "restraints") {
                 interactionComponentChoiceData[componentIndex] = [
                     { key: null, display: "", enabled: true },
+                    { key: "anything", display: "( anything )", enabled: true },
                     ...$projectStore.game.restraints
                         .map((restraintID): [string, ProjectRestraintData] => [restraintID, $projectStore.data.restraints[restraintID]])
                         .map(([restraintID, restraintData]): SelectChoiceData => ({
                             key: restraintID, display: restraintData.devName, enabled: true
                         })),
                 ];
-            } else {
+            } else if($projectStore.data.interactions[$selectedInteractionIDStore].componentTypes[componentIndex] === "objects") {
                 interactionComponentChoiceData[componentIndex] = [
                     { key: null, display: "", enabled: true },
+                    { key: "anything", display: "( anything )", enabled: true },
                     ...$projectStore.game.objects
                         .map((objectID): [string, ProjectObjectData] => [objectID, $projectStore.data.objects[objectID]])
                         .map(([objectID, objectData]): SelectChoiceData => ({
                             key: objectID, display: objectData.devName, enabled: true
+                        })),
+                ];
+            } else {
+                interactionComponentChoiceData[componentIndex] = [
+                    { key: null, display: "", enabled: true },
+                    ...$projectStore.game.restraintLocations
+                        .map((restraintLocationID): [string, ProjectRestraintLocationData] => 
+                            [restraintLocationID, $projectStore.data.restraintLocations[restraintLocationID]])
+                        .map(([restraintLocationID, restraintLocationData]): SelectChoiceData => ({
+                            key: restraintLocationID, display: restraintLocationData.name, enabled: true
                         })),
                 ];
             }
@@ -73,6 +87,12 @@
 
     const interactionActionHasTwoStore: Writable<boolean> = writable(false);
     projectStore.subscribe(projectData => {
+        // Absolutely no clue why I need this, crashes otherwise
+        if($selectedInteractionIDStore !== null && 
+            projectData.data.interactions[$selectedInteractionIDStore] === undefined) {
+            return;
+        }
+        
         $interactionActionHasTwoStore = $selectedInteractionIDStore !== null
             ? projectData.data.interactions[$selectedInteractionIDStore].actionID !== null
                 ? projectData.data.actions[projectData.data.interactions[$selectedInteractionIDStore].actionID].two
@@ -86,13 +106,21 @@
 
     const interactionComponentTypeChoiceData: SelectChoiceData[] = [
         { key: "restraints", display: "Restraint", enabled: true },
+        { key: "restraintLocations", display: "Restraint Location", enabled: true },
         { key: "objects", display: "Object", enabled: true },
     ];
 </script>
 
 <SectionRow height={100}>
-    <SectionCol width={30}>
-        <InteractionsInteractionSelector height={60}/>
+    <SectionCol width={40}>
+        <Section nogrow={true}>
+            <svelte:fragment slot="content">
+                <p>
+                    Note: interactions are handled from top to bottom (stopping after handling the first with matching criteria)
+                </p>
+            </svelte:fragment>
+        </Section>
+        <InteractionsInteractionSelector height={50}/>
         {#if $selectedInteractionIDStore !== null}
             <Section label="Selected Interaction">
                 <svelte:fragment slot="content">
@@ -109,7 +137,7 @@
                         <LabelSelect class="grow" 
                             bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].stateID}
                             choicesData={interactionStateChoiceData}
-                            label={"Bound State (optional)"} />
+                            label={"Attached State (optional)"} />
                     </div>
                     <div class="flex flex-row space-x-3">
                         <LabelSelect class="w-1/2" 
@@ -139,7 +167,7 @@
             </Section>
         {/if}
     </SectionCol>
-    <SectionCol style="width: calc(35% - 0.75em)">
+    <SectionCol style="width: calc(30% - 0.75em)">
         {#if $selectedInteractionIDStore !== null}
             <InteractionsCriteriaSelector height={50} />
             {#if $selectedInteractionCriteriaIDStore !== null}
@@ -147,7 +175,7 @@
             {/if}
         {/if}
     </SectionCol>
-    <SectionCol style="width: calc(35% - 0.75em)">
+    <SectionCol style="width: calc(30% - 0.75em)">
         {#if $selectedInteractionIDStore !== null}
             <InteractionsResultSelector height={50} />
             {#if $selectedInteractionResultIDStore !== null}

@@ -12,7 +12,7 @@
 
     let selectorRadioData: SelectorRadioData[] = [];
     // Somehow subscribe not working
-    projectStore.subscribe(_ => { 
+    function updateSelectorRadioData() {
         if($selectedRestraintIDStore === null) { return; }
         selectorRadioData = Object.entries($projectStore.data.restraints[$selectedRestraintIDStore].tags)
             .map(([index, tag]): SelectorRadioData => ({
@@ -20,7 +20,9 @@
                 component: RadioRestraintTag,
                 props: { index: index, tag: tag }
             })); 
-    });
+    }
+    projectStore.subscribe(updateSelectorRadioData);
+    selectedRestraintIDStore.subscribe(updateSelectorRadioData);
 
     let dummyIDStore: Writable<string | null> = writable(null)
     let restraintTagInput: string = "";

@@ -37,6 +37,7 @@ export function metadataValid(projectData: ProjectData): [boolean, any] {
         version: versionValid,
         synopsis: synopsisValid,
         actions: actionsValid,
+        _hasAction: projectData.game.actions.length >= 1,
     };
     
     const valid = recursiveCheckValid(bundled);
@@ -76,6 +77,9 @@ export function statesValid(projectData: ProjectData): [boolean, any] {
 
     const bundled = {
         states: statesValid,
+        _hasStartingState: Object.values(projectData.data.states)
+            .filter(stateData => ["normal", "transition"].includes(stateData.type))
+            .length >= 1,
     };
 
     const valid = recursiveCheckValid(bundled);
@@ -104,6 +108,7 @@ export function restraintsValid(projectData: ProjectData): [boolean, any] {
     const bundled = {
         restraintLocations: restraintLocationsValid,
         restraints: restraintsValid,
+        // _hasRestraintLocation: projectData.game.restraintLocations.length >= 1
     };
 
     const valid = recursiveCheckValid(bundled);
@@ -139,20 +144,20 @@ export function interactionsValid(projectData: ProjectData): [boolean, any] {
         interactionsValid[id] = {
             devName: interactionData.devName !== "",
             actionID: interactionData.actionID !== null,
-            componentIDs: [interactionData.componentIDs[0] !== null, false],
+            componentIDs: [interactionData.componentIDs[0] !== null, true],
             criteria: {},
             results: {}
         };
         if(interactionData.actionID !== null) {
             const actionData = projectData.data.actions[interactionData.actionID];
-            interactionsValid[id].componentIDs[1] = !actionData.two 
-                || interactionData.componentIDs[1] !== null;
+            // interactionsValid[id].componentIDs[1] = !actionData.two 
+            //     || interactionData.componentIDs[1] !== null;
         }
 
         for(const [criteriaID, interactionCriteriaData] of Object.entries(interactionData.data.criteria)) {
             interactionsValid[id].criteria[criteriaID] = {
                 devName: interactionCriteriaData.devName !== "",
-                args: [false, false, false, false, false], // Just in case
+                args: [], // Just in case
             };
             if(["flagEquals", "flagNotEquals"].includes(interactionCriteriaData.type)) {
                 interactionsValid[id].criteria[criteriaID].args[0] = alsoNotUndefined(interactionCriteriaData.args[0], "");
@@ -160,7 +165,7 @@ export function interactionsValid(projectData: ProjectData): [boolean, any] {
             } else if(["restraintWearing", "restraintNotWearing", "objectFound", "objectNotFound"]
                 .includes(interactionCriteriaData.type)) {
                     interactionsValid[id].criteria[criteriaID].args[0] = alsoNotUndefined(interactionCriteriaData.args[0], null);
-            } else if(["restraintWearingTag", "restraintNotWearingTag", "objectFoundTag", "objectNotFoundTag"]
+            } else if(["restraintWearingTag", "restraintNotWearingTag", "objectFoundTag", "objectNotFoundTag", "targetTag_component1", "targetTag_component2"]
                 .includes(interactionCriteriaData.type)) {
                     interactionsValid[id].criteria[criteriaID].args[0] = alsoNotUndefined(interactionCriteriaData.args[0], "");
             }
@@ -169,16 +174,16 @@ export function interactionsValid(projectData: ProjectData): [boolean, any] {
         for(const [resultID, interactionResultData] of Object.entries(interactionData.data.results)) {
             interactionsValid[id].results[resultID] = {
                 devName: interactionResultData.devName !== "",
-                args: [false, false, false, false, false], // Just in case
+                args: [], // Just in case
             };
             if(["restraintAdd", "restraintRemove", "objectReveal", "objectHide", "setState", "locationAdd", "locationRemove"]
                 .includes(interactionResultData.type)) {
                     interactionsValid[id].results[resultID].args[0] = alsoNotUndefined(interactionResultData.args[0], null);
             } else if(["setFlag"].includes(interactionResultData.type)) {
-                    interactionsValid[id].results[resultID].args[0] = alsoNotUndefined(interactionResultData.args[0], "");
-                    interactionsValid[id].results[resultID].args[1] = alsoNotUndefined(interactionResultData.args[1], "");
+                interactionsValid[id].results[resultID].args[0] = alsoNotUndefined(interactionResultData.args[0], "");
+                interactionsValid[id].results[resultID].args[1] = alsoNotUndefined(interactionResultData.args[1], "");
             } else if(["showDialog"].includes(interactionResultData.type)) {
-                    interactionsValid[id].results[resultID].args[0] = alsoNotUndefined(interactionResultData.args[0], "");
+                interactionsValid[id].results[resultID].args[0] = alsoNotUndefined(interactionResultData.args[0], "");
             }
         }
     }
@@ -214,6 +219,9 @@ export function locationsValid(projectData: ProjectData): [boolean, any] {
 
     const bundled = {
         locations: locationsValid,
+        _hasStartingLocation: Object.values(projectData.data.locations)
+            .filter(locationData => locationData.initial)
+            .length >= 1,
     };
 
     const valid = recursiveCheckValid(bundled);

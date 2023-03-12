@@ -27,7 +27,7 @@ func (b *Bridge) startup(ctx context.Context) {
 
 // ExportProject chooses a file then saves the current project
 func (b *Bridge) ExportProject(data string) {
-	filename, err := dialog.File().SetStartFile("game.prj").Title("Export Project").Filter("Project (*.prj)", "prj").Save()
+	filename, err := dialog.File().SetStartFile("project.json").Title("Export Project").Filter("Project (*.json)", "json").Save()
 	if err != nil {
 		return
 	}
@@ -36,7 +36,7 @@ func (b *Bridge) ExportProject(data string) {
 
 // ImportProject loads and returns an existing project from a file
 func (b *Bridge) ImportProject() string {
-	filename, err := dialog.File().Title("Import Project").Filter("Project (*.prj)", "prj").Load()
+	filename, err := dialog.File().Title("Import Project").Filter("Project (*.json)", "json").Load()
 	if err != nil {
 		return err.Error()
 	}

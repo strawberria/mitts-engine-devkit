@@ -20,16 +20,18 @@
     selectedInteractionCriteriaIDStore.subscribe(updateInteractionCriteriaType);
 
     let criteriaLabelPlaceholderClass: { [key in ProjectInteractionCriteriaType]: [string, string, string][] } = {
-        "flagEquals": [["Flag Key", "doorStatus", "w-1/2"], ["Flag Value", "unlocked", "w-1/2"]],
-        "flagNotEquals": [["Flag Key", "doorStatus", "w-1/2"], ["Flag Value", "unlocked", "w-1/2"]],
+        "flagEquals": [["Flag Key", "doorStatus", "w-2/3"], ["Flag Value", "unlocked", "w-2/3"]],
+        "flagNotEquals": [["Flag Key", "doorStatus", "w-2/3"], ["Flag Value", "unlocked", "w-2/3"]],
         "restraintWearing": [["Restraint", "", "w-2/3"]],
         "restraintNotWearing": [["Restraint", "", "w-2/3"]],
-        "restraintWearingTag": [["Restraint Tag", "locked-star_key", "w-1/2"]],
-        "restraintNotWearingTag": [["Restraint Tag", "locked-star_key", "w-1/2"]],
+        "restraintWearingTag": [["Restraint Tag", "locked-star_key", "w-2/3"]],
+        "restraintNotWearingTag": [["Restraint Tag", "locked-star_key", "w-2/3"]],
         "objectFound": [["Object", "", "w-2/3"]],
         "objectNotFound": [["Object", "", "w-2/3"]],
-        "objectFoundTag": [["Object Tag", "unlocks-star_key", "w-1/2"]],
-        "objectNotFoundTag": [["Object Tag", "unlocks-star_key", "w-1/2"]],
+        "objectFoundTag": [["Object Tag", "unlocks-star_key", "w-2/3"]],
+        "objectNotFoundTag": [["Object Tag", "unlocks-star_key", "w-2/3"]],
+        "targetTag_component1": [["Target 1 Tag", "unlocks-star_key", "w-2/3"]],
+        "targetTag_component2": [["Target 2 Tag", "unlocks-star_key", "w-2/3"]]
     };
     let interactionCriteriaChoiceData: SelectChoiceData[] = [
         ...Object.keys(criteriaLabelPlaceholderClass).map(criteriaType => ({
@@ -95,10 +97,10 @@
             <LabelTextInput bind:value={$projectStore.data.interactions[$selectedInteractionIDStore]
                     .data.criteria[$selectedInteractionCriteriaIDStore].devName}
                 label={"Development Name"}
-                placeholder={"(interaction criteria name, too lazy for placeholder)"}
+                placeholder={"(interaction criteria name, too lazy)"}
                 valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].criteria
                     [$selectedInteractionCriteriaIDStore].devName} />
-            <LabelSelect class="w-1/2" 
+            <LabelSelect class="w-2/3" 
                 bind:value={$projectStore.data.interactions[$selectedInteractionIDStore]
                     .data.criteria[$selectedInteractionCriteriaIDStore].type}
                 onchange={clearInteractionCriteriaArgs}
@@ -106,7 +108,7 @@
                 label={"State Type"} />
             <!-- Index 0 -->
             {#if ["flagEquals", "flagNotEquals", "restraintWearingTag", "restraintNotWearingTag", 
-                "objectFoundTag", "objectNotFoundTag"]
+                "objectFoundTag", "objectNotFoundTag", "targetTag_component1", "targetTag_component2"]
                     .includes($interactionCriteriaTypeStore)}
                         <LabelTextInput class={criteriaLabelPlaceholderClass[$interactionCriteriaTypeStore][0][2]}
                             bind:value={$projectStore.data.interactions[$selectedInteractionIDStore]

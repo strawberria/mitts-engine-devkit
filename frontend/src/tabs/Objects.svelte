@@ -37,9 +37,14 @@
                         label={"Initially Revealed"} />
                 </svelte:fragment>
             </Section>
-            {#if $selectedObjectIDStore !== null}
-                <ObjectsObjectTagSelector />
-            {/if}
+            <Section nogrow={true}>
+                <svelte:fragment slot="content">
+                    <p>
+                        Tip: Tag objects when convenient to simplify interactions (ex: designating 'unreachable' objects)
+                    </p>
+                </svelte:fragment>
+            </Section>
+            <ObjectsObjectTagSelector />
         {/if}
     </SectionCol>
     <SectionCol style="width: calc(35% - 0.75em)">

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import SvelteMarkdown from 'svelte-markdown'
     import LabelTextArea from "../components/LabelTextArea.svelte";
     import LabelTextInput from "../components/LabelTextInput.svelte";
     import LabelToggle from "../components/LabelToggle.svelte";
@@ -34,7 +35,7 @@
             </Section>
         {/if}
     </SectionCol>
-    <SectionCol width={40}>
+    <SectionCol style="width: calc(40% - 0.75em)">
         <Section label="Game Information">
             <svelte:fragment slot="content">
                 <LabelTextInput bind:value={$projectStore.game.metadata.title}
@@ -58,6 +59,21 @@
                     label={"Synopsis"}
                     placeholder={"Mae awakens within a dark basement, alone and heavily restrained..."}
                     valid={$bundleValidStore.metadata.synopsis} />
+            </svelte:fragment>
+        </Section>
+    </SectionCol>
+    <SectionCol style="width: calc(30% - 0.75em)">
+        <Section nogrow={true}>
+            <svelte:fragment slot="content">
+                <p>
+                    Tip: most long-form text including synopsis, state descriptions, examine text, and other dialog content support very basic markdown!
+                    Here are some examples:
+                </p>
+                <div class="text-left">
+                    <SvelteMarkdown source={"\\*\\*bold text\\*\\* = **bold text**"} />
+                    <SvelteMarkdown source={"\\*\\*italics text\\*\\* = *italics text*"} />
+                </div>
+                <p>(other features currently not supported...)</p>
             </svelte:fragment>
         </Section>
     </SectionCol>

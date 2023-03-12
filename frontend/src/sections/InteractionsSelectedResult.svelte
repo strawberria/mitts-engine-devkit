@@ -26,7 +26,7 @@
         "objectReveal": [["Object", "", "w-2/3"]],
         "objectHide": [["Object", "", "w-2/3"]],
         "setState": [["State", "", "w-2/3"]],
-        "setFlag": [["Flag Key", "doorStatus", "w-1/2"], ["Flag Value", "unlocked", "w-1/2"]],
+        "setFlag": [["Flag Key", "doorStatus", "w-2/3"], ["Flag Value", "unlocked", "w-2/3"]],
         "showDialog": [["Dialog Text", "After seemingly hours of sawing with the rusty knife, you finally "
             + "manage to cut through the sturdy leather cuffs encircling your wrists.", "w-full"]],
         "locationAdd": [["Location", "", "w-2/3"]],
@@ -112,10 +112,10 @@
             <LabelTextInput bind:value={$projectStore.data.interactions[$selectedInteractionIDStore]
                     .data.results[$selectedInteractionResultIDStore].devName}
                 label={"Development Name"}
-                placeholder={"(interaction result name, too lazy for placeholder)"}
+                placeholder={"(interaction result name, too lazy)"}
                 valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].results
                     [$selectedInteractionResultIDStore].devName} />
-            <LabelSelect class="w-1/2" 
+            <LabelSelect class="w-2/3" 
                 bind:value={$projectStore.data.interactions[$selectedInteractionIDStore]
                     .data.results[$selectedInteractionResultIDStore].type}
                 onchange={clearInteractionResultArgs}

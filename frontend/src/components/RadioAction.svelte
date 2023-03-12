@@ -14,9 +14,11 @@
     function handleClick() { dispatch("dispatchClick", { id: id }); }
 
     let valid = false;
-    bundleValidStore.subscribe(_ => { 
+    function updateValid() {
         valid = recursiveCheckValid($bundleValidStore.metadata.actions[id]); 
-    });
+    }
+    bundleValidStore.subscribe(updateValid);
+    $: { id; data; updateValid(); }
 </script>
 
 <div class={`flex flex-row justify-between space-x-1
@@ -29,7 +31,11 @@
             ? "border-slate-600" : "border-red-900"))}`}
     on:click={handleClick}>
     <p class="text-left w-11/12 min-w-0 truncate">
-        {data.name} {data.verb !== "" ? `[A ${data.verb} B]` : ""}
+        {data.name} {data.verb !== ""
+            ? `[A] ${data.verb} [B]` 
+            : data.name !== ""
+                ? "[A]" 
+                : ""}
     </p>
     <p class={`font-mono ${selected === true
         ? "text-slate-500"

@@ -14,9 +14,11 @@
     function handleClick() { dispatch("dispatchClick", { id: id }); }
 
     let valid = false;
-    bundleValidStore.subscribe(_ => { 
+    function updateValid() {
         valid = recursiveCheckValid($bundleValidStore.locations.locations[id]); 
-    });
+    }
+    bundleValidStore.subscribe(updateValid);
+    $: { id; data; updateValid(); }
 </script>
 
 <div class={`flex flex-row space-x-1

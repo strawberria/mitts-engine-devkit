@@ -1,0 +1,573 @@
+<script lang="ts">
+    import { writable, Writable } from "svelte/store";
+    import SvelteMarkdown from 'svelte-markdown'
+    import LabelSelect from "./components/LabelSelect.svelte";
+    import Section from "./components/Section.svelte";
+    import SectionCol from "./components/SectionCol.svelte";
+    import SectionRow from "./components/SectionRow.svelte";
+    import type { ProjectActionData, ProjectData, ProjectLocationData, ProjectObjectData, ProjectRestraintData, ProjectRestraintLocationData, ProjectStateData, SelectChoiceData } from "./utilities/typings";
+    import { onMount } from "svelte";
+
+    export let gameDataStore: Writable<ProjectData>;
+    export let usingDevkit: boolean = false;
+
+    interface PlaythroughData {
+        stateID:       string;
+        locationID:    string;
+        restraints:    { [restraintLocationID: string]: string | null };
+        objectIDs:     string[];
+        flags:         { [flagKey: string]: string };
+        locationIDs:   string[];
+        attempts:      number;
+    }
+    function resetPlaythrough(): PlaythroughData {
+        return {
+            // Choose first-ordered non-ending state
+            stateID: $gameDataStore.game.states
+                .map((stateID): [string, ProjectStateData] => [stateID, $gameDataStore.data.states[stateID]])
+                .filter(([stateID, stateData]) => ["normal", "transition"].includes(stateData.type))
+                [0][0],
+            locationID: $gameDataStore.game.locations
+                .filter(locationID => $gameDataStore.data.locations[locationID].initial === true)
+                [0],
+            // Set initial restraints for each restraint location
+            restraints: $gameDataStore.game.restraintLocations
+                .map((restraintLocationID): [string, ProjectRestraintLocationData] => 
+                    [restraintLocationID, $gameDataStore.data.restraintLocations[restraintLocationID]])
+                .reduce((previous, current) => {
+                    previous[current[0]] = current[1].initialRestraintID;   
+                    return previous;
+                }, {} as { [restraintLocationID: string]: string }),
+            // Set initially revealed objects, sort every time added or removed
+            objectIDs: $gameDataStore.game.objects
+                .filter(objectID => $gameDataStore.data.objects[objectID].initial === true),
+            flags: {},
+            locationIDs: $gameDataStore.game.locations
+                .filter(locationID => $gameDataStore.data.locations[locationID].initial === true),
+            attempts: 0,
+        };
+    }
+    let playthroughStore: Writable<PlaythroughData> = writable(resetPlaythrough());
+
+    function _orderedPlaythroughIndividualSort(data: string[], order: string[]) {
+        data.sort((a, b) => {
+            const aIndex = order.indexOf(a);
+            const bIndex = order.indexOf(b);
+            return aIndex < bIndex ? -1 : aIndex === bIndex ? 0 : 1;
+        });
+    }
+    function orderedPlaythroughSort() {
+        _orderedPlaythroughIndividualSort($playthroughStore.objectIDs, $gameDataStore.game.objects);
+        _orderedPlaythroughIndividualSort($playthroughStore.locationIDs, $gameDataStore.game.locations);
+        $playthroughStore = $playthroughStore; // Force update
+    }
+
+    let locationChoiceData: SelectChoiceData[] = [];
+    playthroughStore.subscribe((playthroughData) => {
+        locationChoiceData = playthroughData.locationIDs
+            .map((locationID): [string, ProjectLocationData] => [locationID, $gameDataStore.data.locations[locationID]])
+            .map(([locationID, locationData]) => ({
+                key: locationID, display: locationData.name, enabled: true
+            }));
+    });
+
+    const invalidDialogText = "You can't do that!";
+    let dialogHeader: string | null = null;
+    let dialogText: string | null = null;
+    function setDialog(text: string) {
+        updateCurrentActionText();
+        dialogHeader = $currentActionTextStore;
+        dialogText = text;
+    }
+    function clearDialog() {
+        dialogHeader = null;
+        dialogText = null;
+    }
+
+    let currentActionTextStore: Writable<string> = writable("");
+    let currentActionStore: Writable<[null, null] | [string, ProjectActionData]> = writable([null, null]);
+    // Too lazy to work with arrays, so here are hardcoded stores
+    type CurrentComponentStore = [null, null, null]
+        | [string, "restraints", ProjectRestraintData]
+        | [string, "restraintLocations", ProjectRestraintLocationData]
+        | [string, "objects", ProjectObjectData];
+    let currentComponent1Store: Writable<CurrentComponentStore> = writable([null, null, null]);
+    let currentComponent2Store: Writable<CurrentComponentStore> = writable([null, null, null]);
+    function resetActionComponentStores() {
+        $currentActionStore = [null, null];
+        $currentComponent1Store = [null, null, null];
+        $currentComponent2Store = [null, null, null];
+    }
+    function updateCurrentActionText() {
+        if($currentActionStore[0] === null) { 
+            // Why do I need to set instead of assign?
+            // Issue with Svelte store reactivity?
+            currentActionTextStore.set(""); 
+
+            return;
+        }
+
+        $currentActionTextStore = $currentActionStore[0] === "examine"
+            ? "Examine" 
+            : $currentActionStore[1].name;
+        if($currentComponent1Store[0] !== null) {
+            $currentActionTextStore += ` ${$currentComponent1Store[2].name}`;
+            if($currentActionStore[0] !== "examine") {
+                $currentActionTextStore += ` ${$currentActionStore[1].verb}`
+            }
+            if($currentComponent2Store[0] !== null) {
+                $currentActionTextStore += ` ${$currentComponent2Store[2].name}`;
+            }
+        }
+    }
+    currentActionStore.subscribe(updateCurrentActionText);
+    currentComponent1Store.subscribe(updateCurrentActionText);
+    currentComponent2Store.subscribe(updateCurrentActionText);
+    
+    function xor(a: boolean, b: boolean) { return (a || b) && (a !== b); }
+
+    // Checks whether the current action and components match any interactions
+    // If so, execute results and return true
+    function checkInteraction(): boolean {
+        const orderedInteractionData = $gameDataStore.game.interactions
+            .map((interactionID) => $gameDataStore.data.interactions[interactionID]);
+        for(const interactionData of orderedInteractionData) {
+            // Check whether bound state exists and whether matches
+            if(interactionData.stateID !== null 
+                && $playthroughStore.stateID !== interactionData.stateID) {
+                    continue;
+            } 
+            // Check whether interaction action (non-null) matches current action
+            if(interactionData.actionID !== null
+                && $currentActionStore[0] !== interactionData.actionID) {
+                    continue;
+            }
+            // Check whether component 1 and 2 mismatch
+            // Yes, I can't be bothered to iterate index this, yawn
+            const component1Matches1 = interactionData.componentIDs[0] === "anything"
+                ? $currentComponent1Store[0] !== null
+                : interactionData.componentIDs[0] === $currentComponent1Store[0];
+            const component2Matches2 = interactionData.componentIDs[1] === "anything"
+                ? $currentComponent2Store[0] !== null
+                : interactionData.componentIDs[1] === $currentComponent2Store[0];
+            if(!component1Matches1 || !component2Matches2) {
+                // Immediately return if order forced and 1/2 can't be exchanged
+                if($currentActionStore[1].order === true) { continue; }
+
+                // Check whether component 1 matches 2 and vice versa
+                const component1Matches2 = interactionData.componentIDs[0] === "anything"
+                    ? $currentComponent2Store[0] !== null
+                    : interactionData.componentIDs[0] === $currentComponent2Store[0];
+                const component2Matches1 = interactionData.componentIDs[1] === "anything"
+                    ? $currentComponent1Store[0] !== null
+                    : interactionData.componentIDs[1] === $currentComponent1Store[0];
+
+                // Doesn't match means no components match, skip interaction
+                if(!component1Matches2 || !component2Matches1) { continue; }
+            }
+
+            // Components match, now iterate through criteria and ensure all match
+            let allCriteriasMatch = true;
+            const interactionCriteriaData = Object.values(interactionData.data.criteria);
+            for(const criteriaData of interactionCriteriaData) {
+                const matches = (["flagEquals", "flagNotEquals"].includes(criteriaData.type)  
+                        && (xor(
+                            $playthroughStore.flags[criteriaData.args[0]] === criteriaData.args[1],
+                            criteriaData.type === "flagNotEquals"
+                        )))
+                    || (["objectFound", "objectNotFound"].includes(criteriaData.type)
+                        && (xor(
+                            $playthroughStore.objectIDs.includes(criteriaData.args[0]),
+                            criteriaData.type === "objectNotFound"
+                        )))
+                    || (["objectFoundTag", "objectNotFoundTag"].includes(criteriaData.type)
+                        && (xor(
+                            $playthroughStore.objectIDs
+                                .map((objectID) => $gameDataStore.data.objects[objectID])
+                                .some((objectData) => objectData.tags.includes(criteriaData.args[0])),
+                            criteriaData.type === "objectNotFoundTag"
+                        )))
+                    || (["restraintWearing", "restraintNotWearing"].includes(criteriaData.type)
+                        && (xor(
+                            Object.values($playthroughStore.restraints).includes(criteriaData.args[0]),
+                            criteriaData.type === "restraintNotWearing"
+                        )))
+                    || (["restraintWearingTag", "restraintNotWearingTag"].includes(criteriaData.type)
+                        && (xor(
+                            Object.values($playthroughStore.restraints)
+                                .map((restraintID) => $gameDataStore.data.restraints[restraintID])
+                                .some((restraintData) => restraintData.tags.includes(criteriaData.args[0])),
+                            criteriaData.type === "restraintNotWearingTag"
+                        )))
+                    // Not sure how these should interact with interchangeable interaction components
+                    || (criteriaData.type === "targetTag_component1"
+                        && $currentComponent1Store[0] !== null
+                        && $currentComponent1Store[1] !== "restraintLocations"
+                        && $currentComponent1Store[2].tags.includes(criteriaData.args[0]))
+                    || (criteriaData.type === "targetTag_component2"
+                        && $currentComponent2Store[0] !== null
+                        && $currentComponent2Store[1] !== "restraintLocations"
+                        && $currentComponent2Store[2].tags.includes(criteriaData.args[0]));
+
+                if(matches === false) { 
+                    allCriteriasMatch = false;
+                    break;
+                }
+            }
+
+            // Immediately return if criteria doesn't match
+            if(allCriteriasMatch === false) {
+                continue;
+            }
+
+            // Criteria matches, iterate through and handle results
+            const orderedInteractionResultData = interactionData.order.results
+                .map((resultID) => interactionData.data.results[resultID]);
+            for(const resultData of orderedInteractionResultData) {
+                if(["restraintAdd", "restraintRemove"].includes(resultData.type)) {
+                    const restraintData = $gameDataStore.data.restraints[resultData.args[0]];
+                    $playthroughStore.restraints[restraintData.restraintLocationID] = resultData.type === "restraintAdd"
+                        ? resultData.args[0] : null;
+                } else if(resultData.type === "objectReveal" 
+                    && $playthroughStore.objectIDs.includes(resultData.args[0]) === false) {
+                        $playthroughStore.objectIDs.push(resultData.args[0]);
+                        orderedPlaythroughSort();
+                } else if(resultData.type === "objectHide") {
+                    const objectIDIndex = $playthroughStore.objectIDs.indexOf(resultData.args[0]);
+                    if(objectIDIndex !== -1) {
+                        $playthroughStore.objectIDs.splice(objectIDIndex, 1);
+                        orderedPlaythroughSort();
+                    }
+                } else if(resultData.type === "setState") {
+                    $playthroughStore.stateID === resultData.args[0];
+                    $playthroughStore.attempts = 0;
+                } else if(resultData.type === "setFlag") {
+                    $playthroughStore.flags[resultData.args[0]] = resultData.args[1];
+                } else if(resultData.type === "showDialog") {
+                    setDialog(resultData.args[0]);
+                } else if(resultData.type === "locationAdd"
+                    && $playthroughStore.locationIDs.includes(resultData.args[0]) === false) {
+                        $playthroughStore.locationIDs.push(resultData.args[0]);
+                        orderedPlaythroughSort();       
+                } else if(resultData.type === "locationRemove") {
+                    const locationIDIndex = $playthroughStore.locationIDs.indexOf(resultData.args[0]);
+                    if(locationIDIndex !== -1) {
+                        $playthroughStore.locationIDs.splice(locationIDIndex, 1);
+                        orderedPlaythroughSort();
+                    }
+                }
+            }
+
+            return true;
+        }
+        
+        // No matches, return false
+        return false;
+    }
+
+    function handleClick(type: "action" | "restraints" | "restraintLocations" | "objects", id: string) {
+        // Ignore any object and restraint click if action is not selected
+        if($currentActionStore[0] === null && type !== "action") { 
+            return; 
+        }
+        // If action not selected, select action, update text, and terminate
+        if(type === "action") { 
+            $currentActionStore = [
+                id,
+                $gameDataStore.data.actions[id]
+            ];
+            return; 
+        }
+
+        // If component 1 not selected, select component 1 
+        if($currentComponent1Store[0] === null) {
+            $currentComponent1Store = [
+                id,
+                type as any,
+                $gameDataStore.data[type][id] as any,
+            ];
+
+            if($currentActionStore[0] === "examine") {
+                if($currentComponent1Store[1] !== "restraintLocations") {
+                    setDialog($currentComponent1Store[2].examine);
+                } else {
+                    setDialog(invalidDialogText);
+                    $playthroughStore.attempts++;
+                }
+
+                resetActionComponentStores();
+
+                return;
+            }
+
+            const interactionFound = checkInteraction();
+
+            // If only 1 argument, reset and terminate
+            if(interactionFound || $currentActionStore[1].two === false) {
+                resetActionComponentStores();
+
+                // If no match and reset, show "You can't do that! dialog"
+                if(!interactionFound) {
+                    setDialog(invalidDialogText);
+                    $playthroughStore.attempts++;
+                }
+            }
+
+            return;
+        }
+
+        // If component 2 not selected, select component 2
+        if($currentComponent2Store[0] === null) {
+            $currentComponent2Store = [
+                id,
+                type as any,
+                $gameDataStore.data[type][id] as any,
+            ];
+
+            const interactionFound = checkInteraction();
+            if(!interactionFound) {
+                setDialog(invalidDialogText);
+                $playthroughStore.attempts++;
+            }
+
+            // Reset and terminate because max 2 arguments
+            resetActionComponentStores();
+            return;
+        }
+    }
+
+    const fontFamily = getComputedStyle(document.head).fontFamily;
+    const fontSize = parseFloat(getComputedStyle(document.head).fontSize);
+    let objectNameWidthEM: number = 10; // em
+    let actionNameWidthEM: number = 10; // em
+    gameDataStore.subscribe(gameData => {
+        const measureCanvas = document.createElement("canvas");
+        const measureContext = measureCanvas.getContext("2d");
+        measureContext.font = `${fontSize}px ${fontFamily}`
+
+        // Measure maximum text width of actions
+        let maximumActionWidth: number = measureContext.measureText("Examine").width;
+        for(const actionData of Object.values(gameData.data.actions)) {
+            const textWidth = measureContext.measureText(actionData.name);
+            if(textWidth.width > maximumActionWidth) { maximumActionWidth = textWidth.width; }
+        }
+
+        // Measure maximum text width of objects
+        let maximumObjectWidth: number = 0;
+        for(const objectData of Object.values(gameData.data.objects)) {
+            const textWidth = measureContext.measureText(objectData.name);
+            if(textWidth.width > maximumObjectWidth) { maximumObjectWidth = textWidth.width; }
+        }
+
+        actionNameWidthEM = Math.ceil((maximumActionWidth + 2 * fontSize) / fontSize * 10) / 10;
+        objectNameWidthEM = Math.ceil((maximumObjectWidth + 2 * fontSize) / fontSize * 10) / 10;
+    })
+
+    // ==== Canvas rendering stuff ====
+    let canvas: HTMLCanvasElement;
+    let canvasWidth: number;
+    let canvasHeight: number;
+    let context: CanvasRenderingContext2D;
+</script>
+
+<svelte:head>
+    {#if !usingDevkit}
+        <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+        <script>
+            kofiWidgetOverlay.draw('strawberria', {
+                'type': 'floating-chat',
+                'floating-chat.core.position.bottom-left': 'position: fixed; bottom: 50px; left: 10px; width: 160px; height: 200px;',
+                'floating-chat.donateButton.text': 'Support me',
+                'floating-chat.donateButton.background-color': '#ff5f5f',
+                'floating-chat.donateButton.text-color': '#fff'
+            });
+        </script>
+    {/if}
+</svelte:head>
+<SectionRow class="w-full h-full">
+    <!-- style="margin-bottom: 5rem" -->
+    <SectionCol width={35}>
+        <Section class="grow" 
+            innerClass="h-full py-1 px-0.5 items-stretch">
+            <svelte:fragment slot="content">
+                <img class="border border-slate-800 rounded"
+                    style="max-height: 40%; object-fit: contain"
+                    src={$gameDataStore.data.images[
+                        $gameDataStore.data.states[$playthroughStore.stateID].imageID
+                    ].imageb64} />
+                <div class="whitespace-pre-wrap w-full text-left">
+                    <SvelteMarkdown source={$gameDataStore.data.states[$playthroughStore.stateID].description} />
+                </div>
+
+                <div class="grow" />
+
+                <div class="w-full space-y-1">
+                    {#each $gameDataStore.data.states[$playthroughStore.stateID].hints as hintData, index}
+                        <div class="w-full text-right h-6 select-none">
+                            {#if hintData.attempts !== -1
+                                && $playthroughStore.attempts >= hintData.attempts}
+                                <p class="hover:underline hover:text-slate-300 cursor-pointer" 
+                                    on:click={() => { setDialog(hintData.text)}}>
+                                    Hint {index + 1}
+                                </p>
+                            {/if}
+                        </div>
+                    {/each}
+                </div>
+            </svelte:fragment>
+        </Section>
+    </SectionCol>
+    <SectionCol style="width: calc(35% - 0.75em)">
+        <!-- Copied from LocationsMinimap -->
+        <div class="flex flex-col items-center justify-center grow">
+            {#if dialogText !== null}
+                <Section class="select-none rounded-lg"
+                    style="max-width: 80%" 
+                    innerClass="whitespace-pre-wrap" 
+                    nogrow={true}
+                    nowidth={true}
+                    onclick={() => { clearDialog() }}>
+                    <svelte:fragment slot="content">
+                        <div class="flex flex-col p-1 pb-2 space-y-3">
+                            <p class="whitespace-pre-wrap underline">
+                                {dialogHeader}
+                            </p>
+                            <SvelteMarkdown source={dialogText} />
+                            <p class="text-xs text-slate-500">( Click anywhere to close )</p>
+                        </div>
+                    </svelte:fragment>
+                </Section>
+            {/if}
+        </div>
+        <Section class="select-none"
+            label="Actions" 
+            smallHeader={true} 
+            nogrow={true}>
+            <svelte:fragment slot="header">
+                <div class="text-right pt-1.5 pb-0.5 h-6">
+                    <SvelteMarkdown source={$currentActionTextStore} />
+                </div>
+            </svelte:fragment>
+            <svelte:fragment slot="content">
+                <div class="grid px-3.5" 
+                    style={`grid-template-columns: repeat(auto-fill, minmax(${actionNameWidthEM}em, 6fr));
+                    row-gap: 0.5em`}>
+                    {#each [
+                            { "id": "examine", "name": "Examine" },
+                            ...$gameDataStore.game.actions
+                                .map((actionID) => $gameDataStore.data.actions[actionID]),
+                        ]
+                        as actionData}
+                        <div class="flex flex-row items-start">
+                            <p class="text-left cursor-pointer hover:underline hover:text-slate-300
+                                whitespace-nowrap"
+                                on:click={() => { handleClick("action", actionData.id); }}>
+                                {actionData.name}
+                            </p>
+                        </div>
+                    {/each}
+                </div>
+            </svelte:fragment>
+        </Section>
+        <Section class="select-none"
+            label="Objects"
+            smallHeader={true} 
+            height={50}>
+            <svelte:fragment slot="header">
+                <div></div>
+            </svelte:fragment>
+            <svelte:fragment slot="content">
+                <div class="grid mt-1 px-3.5" 
+                    style={`grid-template-columns: repeat(auto-fill, minmax(${objectNameWidthEM}em, 6fr));
+                    row-gap: 0.5em`}>
+                    {#each $playthroughStore.objectIDs
+                        .map((objectID) => $gameDataStore.data.objects[objectID])
+                        as objectData}
+                        <!-- Necessary to reduce click hitbox -->
+                        <div class="flex flex-row items-start">
+                            <p class="min-w-0 text-left cursor-pointer hover:underline hover:text-slate-300
+                                whitespace-nowrap"
+                                on:click={() => { handleClick("objects", objectData.id); }}>
+                                {objectData.name}
+                            </p>
+                        </div>
+                    {/each}
+                </div>
+            </svelte:fragment>
+        </Section>
+    </SectionCol>
+    <SectionCol style="width: calc(30% - 0.75em)">
+        <!-- Copied from LocationsMinimap -->
+        <Section nogrow={true}>
+            <svelte:fragment slot="content">
+                <div class="flex flex-col w-full text-left px-1 select-none">
+                    <p class="text-lg font-semibold">{$gameDataStore.game.metadata.title}</p>
+                    <div class="flex flex-row w-full">
+                        <p>
+                            Developed by: 
+                            <span class="underline">
+                                {$gameDataStore.game.metadata.author}
+                            </span>
+                        </p>
+                        <div class="grow" />
+                        <p>Version {$gameDataStore.game.metadata.version}</p>
+                    </div>
+                </div>
+            </svelte:fragment>
+        </Section>
+        <Section innerClass="py-1 px-0.5 pb-0.5" 
+            nogrow={true}>
+            <svelte:fragment slot="content">
+                <!-- Can't put this below the canvas for some reason -->
+                <canvas class="bg-inherit aspect-square
+                    border-2 border-slate-700 rounded-sm mb-1" 
+                    style={`background-image: url(${$gameDataStore.data.locations[$playthroughStore.locationID].imageID !== null
+                            && $gameDataStore.data.images[$gameDataStore.data.locations
+                                [$playthroughStore.locationID].imageID].imageb64 !== null
+                                    ? $gameDataStore.data.images[$gameDataStore.data.locations
+                                        [$playthroughStore.locationID].imageID].imageb64
+                                    : ""}); 
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        background-position: center;`}
+                    bind:this={canvas}
+                    width={canvasWidth}
+                    height={canvasHeight}
+                    bind:clientWidth={canvasWidth}
+                    bind:clientHeight={canvasHeight} />
+                <!-- <div class="flex flex-col w-full items-end"> -->
+                <LabelSelect class="w-2/3 pt-0.5"
+                    choicesData={locationChoiceData} 
+                    bind:value={$playthroughStore.locationID} />
+                <!-- </div> -->
+            </svelte:fragment>
+        </Section>
+        <Section class="select-none"
+            innerClass="px-1 pb-0.5"
+            label="Current Restraints" 
+            smallHeader={true}
+            nogrow={true}>
+            <svelte:fragment slot="content">
+                <!-- Can't override space-y-2 through innerClass? -->
+                <div class="flex flex-col w-full h-full space-y-1">
+                    {#each $gameDataStore.game.restraintLocations as restraintLocationID}
+                        <div class="flex flex-row w-full">
+                            <p class="cursor-pointer hover:underline hover:text-slate-300"
+                                on:click={() => { handleClick("restraintLocations", restraintLocationID); }}>
+                                {$gameDataStore.data.restraintLocations[restraintLocationID].name}
+                            </p>
+                            <div class="grow" />
+                            <p class="cursor-pointer hover:underline hover:text-slate-300
+                                text-right"
+                                on:click={() => { handleClick("restraints", $playthroughStore.restraints[restraintLocationID]); }}>
+                                {#if $playthroughStore.restraints[restraintLocationID] !== null}
+                                    {$gameDataStore.data.restraints[$playthroughStore.restraints[restraintLocationID]].name}
+                                {/if}
+                            </p>
+                        </div>
+                    {/each}
+                </div>
+            </svelte:fragment>
+        </Section>
+    </SectionCol>
+</SectionRow>

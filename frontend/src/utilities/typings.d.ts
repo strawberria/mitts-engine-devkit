@@ -56,7 +56,7 @@ export interface ProjectImageData extends ProjectConstruct {
     resolution: [number, number] | null;
 }
 
-export type ProjectStateType = "normal" | "transition" | "ending";
+export type ProjectStateType = "normal" | "transition" | "goodEnding" | "badEnding";
 export interface ProjectHintData { attempts: number; text: string };
 export interface ProjectStateData extends ProjectConstruct {
     devName:                 string;
@@ -96,7 +96,10 @@ export interface ProjectInteractionData extends ProjectConstruct {
     devName:        string;
     actionID:       string | null;
     stateID:        string | null;
-    componentTypes: ["restraints" | "objects", "restraints" | "objects"];
+    componentTypes: [
+        "restraints" | "restraintLocations" | "objects", 
+        "restraints" | "restraintLocations" | "objects"
+    ];
     componentIDs:   [string | null, string | null];
     order: {
         criteria: string[];
@@ -111,7 +114,7 @@ export interface ProjectInteractionData extends ProjectConstruct {
 export type ProjectInteractionCriteriaType = "flagEquals" | "flagNotEquals" 
     | "restraintWearing" | "restraintNotWearing" | "restraintWearingTag" 
     | "restraintNotWearingTag" | "objectFound" | "objectNotFound"
-    | "objectFoundTag" | "objectNotFoundTag";
+    | "objectFoundTag" | "objectNotFoundTag" | "targetTag_1" | "targetTag_2";
 export interface ProjectInteractionCriteriaData extends ProjectConstruct {
     devName: string;
     type:    ProjectInteractionCriteriaType;

@@ -8,6 +8,7 @@
     import States from "./tabs/States.svelte";
     import Restraints from "./tabs/Restraints.svelte";
     import Images from "./tabs/Images.svelte";
+    import { playGameStore } from "./utilities/constants";
     import type { NavigationTabData } from "./utilities/typings";
 
     // Navigation data representing individual tabs for navigation

@@ -2,7 +2,7 @@
     import { projectStore } from "../utilities/project";
     import type { SelectChoiceData } from "../utilities/typings";
 
-    export let label: string;
+    export let label: string = "";
     export let value: any;
     export let disabled: boolean = false;
     export let choicesData: SelectChoiceData[];
@@ -14,10 +14,12 @@
 
 <div class={`flex flex-col items-start space-y-0.5
     ${customClass}`}>
-    <p class="pl-1 
-        text-slate-400 text-sm select-none">
-        {label}
-    </p>
+    {#if label !== ""}
+        <p class="pl-1 
+            text-slate-400 text-sm select-none">
+            {label}
+        </p>
+    {/if}
     <select class={`rounded border placeholder-slate-500 focus:outline-none
         text-slate-300 bg-inherit
         block w-full pl-2 pr-2 pt-1 pb-1

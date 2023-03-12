@@ -12,7 +12,7 @@
 
     let selectorRadioData: SelectorRadioData[] = [];
     // Somehow subscribe not working
-    projectStore.subscribe(_ => { 
+    function updateSelectorRadioData() { 
         if($selectedObjectIDStore === null) { return; }
         selectorRadioData = Object.entries($projectStore.data.objects[$selectedObjectIDStore].tags)
             .map(([index, tag]): SelectorRadioData => ({
@@ -20,7 +20,9 @@
                 component: RadioObjectTag,
                 props: { index: index, tag: tag }
             })); 
-    });
+    }
+    projectStore.subscribe(updateSelectorRadioData);
+    selectedObjectIDStore.subscribe(updateSelectorRadioData);
 
     let dummyIDStore: Writable<string | null> = writable(null)
     let objectTagInput: string = "";

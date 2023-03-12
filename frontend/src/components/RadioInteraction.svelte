@@ -14,9 +14,11 @@
     function handleClick() { dispatch("dispatchClick", { id: id }); }
 
     let valid = false;
-    bundleValidStore.subscribe(_ => { 
+    function updateValid() {
         valid = recursiveCheckValid($bundleValidStore.interactions.interactions[id]); 
-    });
+    }
+    bundleValidStore.subscribe(updateValid);
+    $: { id; data; updateValid(); }
 </script>
 
 <div class={`flex flex-row space-x-1
@@ -35,14 +37,26 @@
         <p class={`text-left w-11/12 min-w-0 text-sm truncate h-5
             ${selected === true ? "text-slate-400" : "text-slate-500"}`}>
             {#if data.actionID !== null}
-                {$projectStore.data.actions[data.actionID].name}
-                {data.componentIDs[0] !== null && data.componentIDs[1] === null
-                    ? `[${$projectStore.data[data.componentTypes[0]][data.componentIDs[0]].devName}]`
-                    : data.componentIDs[0] !== null && data.componentIDs[1] !== null
-                        ? `${$projectStore.data.actions[data.actionID].verb} [${$projectStore.data[data.componentTypes[0]][data.componentIDs[0]].devName}]
-                            ${$projectStore.data.actions[data.actionID].verb} 
-                            [${$projectStore.data[data.componentTypes[1]][data.componentIDs[1]].devName}]`
+                {@const componentText1 = data.componentIDs[0] === "anything"
+                    ? "( anything )"
+                    : data.componentIDs[0] !== null
+                        ? `[${$projectStore.data[data.componentTypes[0]][data.componentIDs[0]]
+                            [data.componentTypes[0] === "restraintLocations" 
+                                ? "name" : "devName"]}]`
                         : ""}
+                {@const componentText2 = data.componentIDs[1] === "anything"
+                    ? "( anything )"
+                    : data.componentIDs[1] !== null
+                        ? `[${$projectStore.data[data.componentTypes[1]][data.componentIDs[1]]
+                            [data.componentTypes[1] === "restraintLocations" 
+                                ? "name" : "devName"]}]`
+                        : ""}
+                {$projectStore.data.actions[data.actionID].name}
+                {data.componentIDs[0] !== null
+                    ? data.componentIDs[1] !== null
+                        ? ` ${componentText1} ${$projectStore.data.actions[data.actionID].verb} ${componentText2}`
+                        : ` ${componentText1}`
+                    : ""}
             {/if}
         </p>
     </div>

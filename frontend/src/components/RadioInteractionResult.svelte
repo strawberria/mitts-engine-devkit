@@ -15,14 +15,17 @@
     function handleClick() { dispatch("dispatchClick", { id: id }); }
 
     let valid = false;
-    bundleValidStore.subscribe(_ => { 
+    function updateValid() {
         if($selectedInteractionIDStore === null
             || $bundleValidStore.interactions.interactions[$selectedInteractionIDStore] === undefined) { 
                 return; 
         }
+        window["bundleValidStore"] = $bundleValidStore;
         valid = recursiveCheckValid($bundleValidStore.interactions
             .interactions[$selectedInteractionIDStore].results[id]); 
-    });
+    }
+    bundleValidStore.subscribe(updateValid);
+    $: { id; data; updateValid(); }
 </script>
 
 <div class={`flex flex-row space-x-1

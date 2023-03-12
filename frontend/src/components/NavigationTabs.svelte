@@ -1,5 +1,7 @@
 <script lang="ts">
-    import { pulseImportStore, selectedTabStore } from "../utilities/constants";
+    import Game from "../Game.svelte";
+    import { playGameStore, pulseImportStore, selectedTabStore } from "../utilities/constants";
+    import { projectStore } from "../utilities/project";
     import type { NavigationTabData } from "../utilities/typings";
 
     // By default, show the first tab on startup
@@ -15,6 +17,12 @@
                 <svelte:component this={navigationTabData.component} />
             </div>
         {/each}
+        {#if $playGameStore}
+            <div class="absolute inset-0 bg-slate-900 text-slate-300 p-3 z-40">
+                <Game gameDataStore={projectStore}
+                    usingDevkit={true} />
+            </div>
+        {/if}
     </div>  
 {/if}
 
