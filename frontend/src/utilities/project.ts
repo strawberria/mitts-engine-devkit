@@ -107,7 +107,8 @@ class MutateProject {
         order.push(newID);
 
         // Set to new ID, not everyone will like?
-        selectedIDStore.set(newID);
+        // Ends up breaking things
+        // selectedIDStore.set(newID);
 
         // const selectedID = get(selectedIDStore);
         // if(selectedID === null) { selectedIDStore.set(newID); }

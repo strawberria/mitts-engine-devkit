@@ -22,8 +22,8 @@
     let criteriaLabelPlaceholderClass: { [key in ProjectInteractionCriteriaType]: [string, string, string][] } = {
         "flagEquals": [["Flag Key", "doorStatus", "w-2/3"], ["Flag Value", "unlocked", "w-2/3"]],
         "flagNotEquals": [["Flag Key", "doorStatus", "w-2/3"], ["Flag Value", "unlocked", "w-2/3"]],
-        "restraintWearing": [["Restraint", "", "w-2/3"]],
-        "restraintNotWearing": [["Restraint", "", "w-2/3"]],
+        "restraintWearing": [["Restraint", "", "w-full"]],
+        "restraintNotWearing": [["Restraint", "", "w-full"]],
         "restraintWearingTag": [["Restraint Tag", "locked-star_key", "w-2/3"]],
         "restraintNotWearingTag": [["Restraint Tag", "locked-star_key", "w-2/3"]],
         "objectFound": [["Object", "", "w-2/3"]],

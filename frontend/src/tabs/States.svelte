@@ -53,7 +53,7 @@
 </script>
 
 <SectionRow height={100}>
-    <SectionCol width={30}>
+    <SectionCol width={35}>
         <StatesStateSelector height={50} />
         {#if $selectedStateIDStore !== null}
             <Section label="Selected State">
@@ -81,7 +81,7 @@
             </Section>
         {/if}
     </SectionCol>
-    <SectionCol style="width: calc(35% - 0.75rem)">
+    <SectionCol style="width: calc(30% - 0.75rem)">
         {#if $selectedStateIDStore !== null}
             <SectionMultiple label="Available Actions"
                 selectedIDs={$projectStore.data.states[$selectedStateIDStore].availableActionIDs}
@@ -125,7 +125,7 @@
                 </svelte:fragment>
             </Section>
             <!-- <Section /> -->
-            <div class="grow" />
+            <!-- <div class="grow" />
 
             <Section nogrow={true}>
                 <svelte:fragment slot="content">
@@ -133,7 +133,7 @@
                         Tip: Duplicate states whenever possible to save development effort (much less typing, trust me!)
                     </p>
                 </svelte:fragment>
-            </Section>
+            </Section> -->
         {/if}
     </SectionCol>
 </SectionRow>

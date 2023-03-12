@@ -165,9 +165,14 @@ export function interactionsValid(projectData: ProjectData): [boolean, any] {
             } else if(["restraintWearing", "restraintNotWearing", "objectFound", "objectNotFound"]
                 .includes(interactionCriteriaData.type)) {
                     interactionsValid[id].criteria[criteriaID].args[0] = alsoNotUndefined(interactionCriteriaData.args[0], null);
+                    interactionsValid[id].criteria[criteriaID].args[1] = true;
             } else if(["restraintWearingTag", "restraintNotWearingTag", "objectFoundTag", "objectNotFoundTag", "targetTag_component1", "targetTag_component2"]
                 .includes(interactionCriteriaData.type)) {
                     interactionsValid[id].criteria[criteriaID].args[0] = alsoNotUndefined(interactionCriteriaData.args[0], "");
+                    interactionsValid[id].criteria[criteriaID].args[1] = true;
+            } else {
+                interactionsValid[id].criteria[criteriaID].args[0] = true;
+                interactionsValid[id].criteria[criteriaID].args[1] = true;
             }
         }
 
@@ -179,11 +184,16 @@ export function interactionsValid(projectData: ProjectData): [boolean, any] {
             if(["restraintAdd", "restraintRemove", "objectReveal", "objectHide", "setState", "locationAdd", "locationRemove"]
                 .includes(interactionResultData.type)) {
                     interactionsValid[id].results[resultID].args[0] = alsoNotUndefined(interactionResultData.args[0], null);
+                    interactionsValid[id].results[resultID].args[1] = true;
             } else if(["setFlag"].includes(interactionResultData.type)) {
                 interactionsValid[id].results[resultID].args[0] = alsoNotUndefined(interactionResultData.args[0], "");
                 interactionsValid[id].results[resultID].args[1] = alsoNotUndefined(interactionResultData.args[1], "");
             } else if(["showDialog"].includes(interactionResultData.type)) {
                 interactionsValid[id].results[resultID].args[0] = alsoNotUndefined(interactionResultData.args[0], "");
+                interactionsValid[id].results[resultID].args[1] = true;
+            } else { // restraintAddTarget, restraintRemoveTarget
+                interactionsValid[id].results[resultID].args[0] = true;
+                interactionsValid[id].results[resultID].args[1] = true;
             }
         }
     }

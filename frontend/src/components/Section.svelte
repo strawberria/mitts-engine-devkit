@@ -27,7 +27,8 @@
     on:click={onclick}>
     {#if label !== ""}
         <div class={`flex flex-row w-full
-            select-none mt-1 pl-4 pr-4
+            select-none mt-1 
+            ${smallHeader ? "px-2" : "px-4"}
             ${$$slots["pre-content"] || smallHeader ? "mb-1" : "mb-2"}`}>
             <div class={`flex flex-col justify-center ${$$slots.header && !noheader ? "" : "w-full"}`}>
                 <p class={smallHeader ? "text-lg font-semibold" : "text-xl"}>{label}</p>

@@ -6,7 +6,7 @@
     import Section from "../components/Section.svelte";
     import { selectedInteractionResultIDStore, selectedInteractionIDStore } from "../utilities/constants";
     import { bundleValidStore, projectStore } from "../utilities/project";
-    import type { ProjectInteractionResultType, ProjectObjectData, ProjectRestraintData, ProjectRestraintLocationData, ProjectStateData, SelectChoiceData } from "../utilities/typings";
+    import type { ProjectInteractionResultType, ProjectLocationData, ProjectObjectData, ProjectRestraintData, ProjectRestraintLocationData, ProjectStateData, SelectChoiceData } from "../utilities/typings";
 
     let interactionResultTypeStore: Writable<ProjectInteractionResultType> = writable("restraintAdd");
     function updateInteractionResultType() {
@@ -21,8 +21,10 @@
     selectedInteractionResultIDStore.subscribe(updateInteractionResultType);
 
     let resultLabelPlaceholderClass: { [key in ProjectInteractionResultType]: [string, string, string][] } = {
-        "restraintAdd": [["Restraint", "", "w-2/3"]],
-        "restraintRemove": [["Restraint", "", "w-2/3"]],
+        "restraintAdd": [["Restraint", "", "w-full"]],
+        "restraintRemove": [["Restraint", "", "w-full"]],
+        "restraintAddTarget": [["Which Target", "", "w-1/2"]],
+        "restraintRemoveTarget": [["Which Target", "", "w-1/2"]],
         "objectReveal": [["Object", "", "w-2/3"]],
         "objectHide": [["Object", "", "w-2/3"]],
         "setState": [["State", "", "w-2/3"]],
@@ -38,6 +40,10 @@
         }))  
     ];
 
+    let targetChoiceData: SelectChoiceData[] = [
+        { key: 0, display: "Component 1", enabled: true },
+        { key: 1, display: "Component 2", enabled: true }
+    ]
     let restraintChoiceData: SelectChoiceData[] = [];
     let objectChoiceData: SelectChoiceData[] = [];
     let stateChoiceData: SelectChoiceData[] = [];
@@ -70,7 +76,15 @@
             ...$projectStore.game.states
                 .map((stateID): [string, ProjectStateData] => [stateID, $projectStore.data.states[stateID]])
                 .map(([stateID, stateData]): SelectChoiceData => ({
-                    key: stateData, display: stateData.devName, enabled: true
+                    key: stateID, display: stateData.devName, enabled: true
+                })),
+        ];
+        locationChoiceData = [
+            { key: null, display: "", enabled: true },
+            ...$projectStore.game.locations
+                .map((locationID): [string, ProjectLocationData] => [locationID, $projectStore.data.locations[locationID]])
+                .map(([locationID, locationData]): SelectChoiceData => ({
+                    key: locationID, display: locationData.devName, enabled: true
                 })),
         ];
         // TODO add location once implemented
@@ -80,8 +94,11 @@
         if(["setFlag", "showDialog"].includes($interactionResultTypeStore)) {
             resultSelectChoiceData[0] = [];   
             resultSelectChoiceData[1] = [];            
-        } else if(["restraintAdd", "objectNotFound"].includes($interactionResultTypeStore)) {
+        } else if(["restraintAdd", "restraintRemove"].includes($interactionResultTypeStore)) {
             resultSelectChoiceData[0] = restraintChoiceData;
+            resultSelectChoiceData[1] = [];            
+        } else if(["restraintAddTarget", "restraintRemoveTarget"].includes($interactionResultTypeStore)) {
+            resultSelectChoiceData[0] = targetChoiceData;
             resultSelectChoiceData[1] = [];            
         } else if(["objectReveal", "objectHide"].includes($interactionResultTypeStore)) {
             resultSelectChoiceData[0] = objectChoiceData;
@@ -91,7 +108,7 @@
             resultSelectChoiceData[1] = [];            
         } else if(["locationAdd", "locationRemove"].includes($interactionResultTypeStore)) {
             // TODO add location once implemented
-            resultSelectChoiceData[0] = [];
+            resultSelectChoiceData[0] = locationChoiceData;
             resultSelectChoiceData[1] = [];  
         }
     }
@@ -131,8 +148,8 @@
                             placeholder={resultLabelPlaceholderClass[$interactionResultTypeStore][0][1]}
                             valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].results
                                 [$selectedInteractionResultIDStore].args[0]} />
-            {:else if ["restraintAdd", "restraintRemove", "objectReveal", "objectHide", "setState", 
-                "locationAdd", "locationRemove"]
+            {:else if ["restraintAdd", "restraintRemove", "restraintAddTarget", "restraintRemoveTarget", 
+                "objectReveal", "objectHide", "setState", "locationAdd", "locationRemove"]
                     .includes($interactionResultTypeStore)}
                         <LabelSelect class={resultLabelPlaceholderClass[$interactionResultTypeStore][0][2]}
                             bind:value={$projectStore.data.interactions[$selectedInteractionIDStore]

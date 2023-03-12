@@ -23,13 +23,17 @@
                 let stateText = interactionData.stateID !== null
                     ? $projectStore.data.states[interactionData.stateID].devName
                     : "";
-                let componentText1 = interactionData.componentIDs[0] !== null
+                let componentText1 = (interactionData.componentIDs[0] !== null
+                    && $projectStore.data[interactionData.componentTypes[0]]
+                        [interactionData.componentIDs[0]] !== undefined)
                     ? interactionData.componentIDs[0] === "anything"
                         ? "( anything )"
                         : $projectStore.data[interactionData.componentTypes[0]]
                         [interactionData.componentIDs[0]].name
                     : "";
-                let componentText2 = interactionData.componentIDs[1] !== null
+                let componentText2 = (interactionData.componentIDs[1] !== null
+                    && $projectStore.data[interactionData.componentTypes[1]]
+                        [interactionData.componentIDs[0]] !== undefined)
                     ? interactionData.componentIDs[1] === "anything"
                         ? "( anything )"
                         : $projectStore.data[interactionData.componentTypes[1]]

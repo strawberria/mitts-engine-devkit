@@ -114,7 +114,7 @@ export interface ProjectInteractionData extends ProjectConstruct {
 export type ProjectInteractionCriteriaType = "flagEquals" | "flagNotEquals" 
     | "restraintWearing" | "restraintNotWearing" | "restraintWearingTag" 
     | "restraintNotWearingTag" | "objectFound" | "objectNotFound"
-    | "objectFoundTag" | "objectNotFoundTag" | "targetTag_1" | "targetTag_2";
+    | "objectFoundTag" | "objectNotFoundTag" | "targetTag_component1" | "targetTag_component2";
 export interface ProjectInteractionCriteriaData extends ProjectConstruct {
     devName: string;
     type:    ProjectInteractionCriteriaType;
@@ -122,6 +122,7 @@ export interface ProjectInteractionCriteriaData extends ProjectConstruct {
 }
 
 export type ProjectInteractionResultType = "restraintAdd" | "restraintRemove"
+    | "restraintAddTarget" | "restraintRemoveTarget"
     | "objectReveal" | "objectHide" | "setState" | "setFlag" | "showDialog"
     | "locationAdd" | "locationRemove";
 export interface ProjectInteractionResultData extends ProjectConstruct {

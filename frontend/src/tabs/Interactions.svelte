@@ -86,23 +86,30 @@
     selectedInteractionIDStore.subscribe(updateinteractionComponentChoiceData);
 
     const interactionActionHasTwoStore: Writable<boolean> = writable(false);
-    projectStore.subscribe(projectData => {
+    function updateHasTwoStore() {
         // Absolutely no clue why I need this, crashes otherwise
         if($selectedInteractionIDStore !== null && 
-            projectData.data.interactions[$selectedInteractionIDStore] === undefined) {
+            $projectStore.data.interactions[$selectedInteractionIDStore] === undefined) {
             return;
         }
         
         $interactionActionHasTwoStore = $selectedInteractionIDStore !== null
-            ? projectData.data.interactions[$selectedInteractionIDStore].actionID !== null
-                ? projectData.data.actions[projectData.data.interactions[$selectedInteractionIDStore].actionID].two
+            ? $projectStore.data.interactions[$selectedInteractionIDStore].actionID !== null
+                ? $projectStore.data.actions[$projectStore.data.interactions[$selectedInteractionIDStore].actionID].two
                 : false
             : false;
         if($selectedInteractionIDStore !== null && !$interactionActionHasTwoStore
             && $projectStore.data.interactions[$selectedInteractionIDStore].componentIDs[1] !== null) {
             $projectStore.data.interactions[$selectedInteractionIDStore].componentIDs[1] = null;
         }
-    });
+    }
+    projectStore.subscribe(updateHasTwoStore);
+    selectedInteractionIDStore.subscribe(updateHasTwoStore);
+
+    // When component type changes, reset selected component of index to null
+    function resetSelectedComponent(index: number) {
+        $projectStore.data.interactions[$selectedInteractionIDStore].componentIDs[index] = null;
+    }
 
     const interactionComponentTypeChoiceData: SelectChoiceData[] = [
         { key: "restraints", display: "Restraint", enabled: true },
@@ -143,10 +150,12 @@
                         <LabelSelect class="w-1/2" 
                             bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentTypes[0]}
                             choicesData={interactionComponentTypeChoiceData}
+                            on:change={() => { resetSelectedComponent(0); }}
                             label={"Component 1 Type"} />
                         <LabelSelect class="w-1/2" 
                             bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentTypes[1]}
                             choicesData={interactionComponentTypeChoiceData}
+                            on:change={() => { resetSelectedComponent(1); }}
                             disabled={!$interactionActionHasTwoStore}
                             label={"Component 2 Type"} />
                     </div>
