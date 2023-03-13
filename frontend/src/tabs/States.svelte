@@ -16,7 +16,7 @@
     const stateTypeChoiceData: SelectChoiceData[] = [
         { key: "normal", display: "Normal", enabled: true },
         { key: "transition", display: "Transition", enabled: true },
-        { key: "gpodEnding", display: "Good Ending", enabled: true },
+        { key: "goodEnding", display: "Good Ending", enabled: true },
         { key: "badEnding", display: "Bad Ending", enabled: true },
     ];
 
