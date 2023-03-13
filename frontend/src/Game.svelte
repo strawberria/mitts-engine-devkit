@@ -1,12 +1,13 @@
 <script lang="ts">
     import { get, writable, Writable } from "svelte/store";
-    import IconButton from "./components/IconButton.svelte";
     import SvelteMarkdown from 'svelte-markdown'
+    import IconButton from "./components/IconButton.svelte";
     import LabelSelect from "./components/LabelSelect.svelte";
     import Section from "./components/Section.svelte";
     import SectionCol from "./components/SectionCol.svelte";
     import SectionRow from "./components/SectionRow.svelte";
     import type { ProjectActionData, ProjectData, ProjectLocationData, ProjectObjectData, ProjectRestraintData, ProjectRestraintLocationData, ProjectStateData, SelectChoiceData } from "./utilities/typings";
+    import { onMount } from "svelte";
 
     let previousStateID: string | null = null;
     export let gameDataStore: Writable<ProjectData>;
@@ -38,7 +39,7 @@
                 .reduce((previous, current) => {
                     previous[current[0]] = current[1].initialRestraintID;   
                     return previous;
-                }, {} as { [restraintLocationID: string]: string }),
+                }, {} as { [restraintLocationID: string]: string | null }),
             // Set initially revealed objects, sort every time added or removed
             objectIDs: $gameDataStore.game.objects
                 .filter(objectID => $gameDataStore.data.objects[objectID].initial === true),
@@ -49,7 +50,7 @@
         };
     }
     function revertStateID() {
-        $playthroughStore.stateID = previousStateID;
+        $playthroughStore.stateID = previousStateID as string;
     }
     let playthroughStore: Writable<PlaythroughData> = writable(resetPlaythrough());
 
@@ -78,9 +79,11 @@
     const invalidDialogText = "You can't do that!";
     let dialogHeader: string | null = null;
     let dialogText: string | null = null;
-    function setDialog(text: string) {
+    function setDialog(text: string, header = true) {
         updateCurrentActionText();
-        dialogHeader = $currentActionTextStore;
+        dialogHeader = header
+            ? $currentActionTextStore
+            : "";
         dialogText = text;
     }
     function clearDialog() {
@@ -389,6 +392,57 @@
     let canvasWidth: number;
     let canvasHeight: number;
     let context: CanvasRenderingContext2D;
+    onMount(() => { context = canvas.getContext("2d") as CanvasRenderingContext2D; });
+
+    // Renders a dumb number of times, can't do anything about it
+    function handleMinimapClick(event?: MouseEvent) {
+        // For efficiency, only re-render when tab is selected
+        if(event === undefined || context === undefined || canvas === null) { return; }
+
+        // Get absolute coordinates for checking click target
+        const boundingRect = canvas.getBoundingClientRect();
+        const clickCoordX = event.clientX - boundingRect.left;
+        const clickCoordY = event.clientY - boundingRect.top;
+
+        // Iterate over minimap objects, drawing paths and checking inclusion
+        const locationData = $gameDataStore.data.locations[$playthroughStore.locationID];
+        for(const minimapObjectData of locationData.order.locationObjects
+            .map(locationID => locationData.data.locationObjects[locationID])) {
+                const path = new Path2D();
+                if(minimapObjectData.type === "vector") {
+                    for(const [pointRatioX, pointRatioY] of minimapObjectData.args) {
+                        const pointCoordX = Math.floor(pointRatioX * boundingRect.width);
+                        const pointCoordY = Math.floor(pointRatioY * boundingRect.height);
+                        path.lineTo(pointCoordX, pointCoordY);
+                    }
+                } else { // if(minimapObjectData.type === "circle")
+                    const [[centerRatioX, centerRatioY], [radiusRatioX, radiusRatioY]] = minimapObjectData.args;
+                    const centerCoordX = Math.floor(centerRatioX * boundingRect.width);
+                    const centerCoordY = Math.floor(centerRatioY * boundingRect.height);
+                    const radiusCoordX = Math.floor(radiusRatioX * boundingRect.width);
+                    const radiusCoordY = Math.floor(radiusRatioY * boundingRect.height);
+                    const radius = Math.sqrt(Math.pow(centerCoordX - radiusCoordX, 2) + Math.pow(centerCoordY - radiusCoordY, 2));
+                    path.arc(centerCoordX, centerCoordY, radius, 0, 2 * Math.PI);
+                }
+
+                // Check whether click point is included within the path
+                if(context.isPointInPath(path, clickCoordX, clickCoordY)) {
+                    // Reveal object and show dialog if defined
+                    if(minimapObjectData.objectID !== undefined
+                        && $playthroughStore.objectIDs.includes(minimapObjectData.objectID) === false) {
+                        $playthroughStore.objectIDs.push(minimapObjectData.objectID);
+                        orderedPlaythroughSort();
+                    }
+                    if(minimapObjectData.dialog !== "") {
+                        setDialog(minimapObjectData.dialog, false);
+                    }
+
+                    // Don't execute interaction since not included
+                }
+        }
+    }
+
+    let kofiDiv: any;
 </script>
 
 <svelte:head>
@@ -399,7 +453,7 @@
                 'type': 'floating-chat',
                 'floating-chat.core.position.bottom-left': 'position: fixed; bottom: 50px; left: 10px; width: 160px; height: 200px;',
                 'floating-chat.donateButton.text': 'Support me',
-                'floating-chat.donateButton.background-color': '#ff5f5f',
+                'floating-chat.donateButton.background-color': '#334155',
                 'floating-chat.donateButton.text-color': '#fff'
             });
         </script>
@@ -409,11 +463,13 @@
 {#if $gameDataStore.data.states[$playthroughStore.stateID].type === "normal"}
     <SectionRow class="w-full h-full">
         <!-- style="margin-bottom: 5rem" -->
-        <SectionCol width={35}>
-            <Section class="grow" 
-                innerClass="h-full py-2 px-0.5 items-stretch">
+        <SectionCol width={30}>
+            <Section class="grow"
+                innerClass="h-full py-2 px-0.5 items-stretch"
+                style="margin-bottom: 4.5rem">
                 <svelte:fragment slot="content">
-                    <img class="mb-1 border border-slate-800 rounded"
+                    <!-- border-2 border-slate-700  -->
+                    <img class="mb-1 rounded"
                         style="max-height: 45%; object-fit: contain"
                         src={$gameDataStore.data.images[
                             $gameDataStore.data.states[$playthroughStore.stateID].imageID
@@ -439,8 +495,9 @@
                     </div>
                 </svelte:fragment>
             </Section>
+            <div bind:this={kofiDiv} />
         </SectionCol>
-        <SectionCol style="width: calc(35% - 0.75em)">
+        <SectionCol style="width: calc(40% - 0.75em)">
             <!-- Copied from LocationsMinimap -->
             <div class="flex flex-col items-center justify-center grow">
                 {#if dialogText !== null}
@@ -500,7 +557,7 @@
             <Section class="select-none"
                 label="Objects"
                 smallHeader={true} 
-                height={50}>
+                height={40}>
                 <svelte:fragment slot="header">
                     <div></div>
                 </svelte:fragment>
@@ -562,7 +619,8 @@
                         width={canvasWidth}
                         height={canvasHeight}
                         bind:clientWidth={canvasWidth}
-                        bind:clientHeight={canvasHeight} />
+                        bind:clientHeight={canvasHeight}
+                        on:click={handleMinimapClick} />
                     <!-- <div class="flex flex-col w-full items-end"> -->
                     <LabelSelect class="w-2/3 pt-0.5"
                         choicesData={locationChoiceData} 
@@ -573,8 +631,7 @@
             <Section class="select-none"
                 innerClass="px-1 pb-0.5"
                 label="Current Restraints" 
-                smallHeader={true}
-                nogrow={true}>
+                smallHeader={true}>
                 <svelte:fragment slot="content">
                     <!-- Can't override space-y-2 through innerClass? -->
                     <div class="flex flex-col w-full h-full space-y-1">
@@ -608,7 +665,7 @@
                 class="w-1/2 min-h-0 rounded-lg"
                 innerClass="items-center pt-2 pb-1.5 w-11/12">
                 <svelte:fragment slot="content">
-                    <img class="mb-1 border border-slate-800 rounded"
+                    <img class="mb-1 border border-slate-700 rounded"
                         style="max-width: 60%; object-fit: contain"
                         src={$gameDataStore.data.images[
                             $gameDataStore.data.states[$playthroughStore.stateID].imageID

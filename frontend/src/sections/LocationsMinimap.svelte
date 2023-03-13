@@ -156,9 +156,9 @@
 </script>
 
 {#if $selectedLocationIDStore !== null}
+    <!-- label="Minimap Preview" -->
     <Section class="aspect-square pb-3" 
         innerClass="flex flex-row items-center justify-center h-full min-h-0"
-        label="Minimap Preview"
         nogrow={true}>
         <svelte:fragment slot="content">
             <canvas class="h-full w-full bg-inherit

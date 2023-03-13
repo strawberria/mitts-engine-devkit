@@ -94,6 +94,10 @@ class MutateProject {
         projectStore.set(projectData);
     }
     async exportProject() {
+        projectStore.update(d => {
+            d.custodial.version = engineVersion;
+            return d;
+        })
         const rawProjectData = JSON.stringify(get(projectStore));
         await ExportProject(rawProjectData);
     }
