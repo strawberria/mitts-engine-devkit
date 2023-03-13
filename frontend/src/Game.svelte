@@ -52,6 +52,10 @@
     function revertStateID() {
         $playthroughStore.stateID = previousStateID as string;
     }
+    function continueState() {
+        const currentStateIndex = $gameDataStore.game.states.indexOf($playthroughStore.stateID);
+        $playthroughStore.stateID = $gameDataStore.game.states[currentStateIndex+1]
+    }
     let playthroughStore: Writable<PlaythroughData> = writable(resetPlaythrough());
 
     function _orderedPlaythroughIndividualSort(data: string[], order: string[]) {
@@ -392,7 +396,13 @@
     let canvasWidth: number;
     let canvasHeight: number;
     let context: CanvasRenderingContext2D;
-    onMount(() => { context = canvas.getContext("2d") as CanvasRenderingContext2D; });
+    function updateCanvasContext() {
+        if(canvas !== undefined) { 
+            context = canvas.getContext("2d") as CanvasRenderingContext2D;
+        }
+    }
+    onMount(updateCanvasContext);
+    playthroughStore.subscribe(updateCanvasContext);
 
     // Renders a dumb number of times, can't do anything about it
     function handleMinimapClick(event?: MouseEvent) {
@@ -692,7 +702,7 @@
                     {:else}
                         <IconButton label="Continue"
                             class="w-22 rounded"
-                            onclick={revertStateID}>
+                            onclick={continueState}>
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>                          
