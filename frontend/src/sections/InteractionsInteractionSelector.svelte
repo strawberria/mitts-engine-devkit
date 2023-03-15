@@ -11,6 +11,7 @@
 
     let filterTextStore: Writable<string> = writable("");
 
+    let combined: string;
     let selectorRadioData: SelectorRadioData[] = [];
     function updateSelectorRadioData() {
         selectorRadioData = $projectStore.game.interactions
@@ -23,24 +24,24 @@
                 let stateText = interactionData.stateID !== null
                     ? $projectStore.data.states[interactionData.stateID].devName
                     : "";
-                let componentText1 = (interactionData.componentIDs[0] !== null
-                    && $projectStore.data[interactionData.componentTypes[0]]
-                        [interactionData.componentIDs[0]] !== undefined)
-                    ? interactionData.componentIDs[0] === "anything"
-                        ? "( anything )"
-                        : $projectStore.data[interactionData.componentTypes[0]]
-                        [interactionData.componentIDs[0]].name
-                    : "";
-                let componentText2 = (interactionData.componentIDs[1] !== null
-                    && $projectStore.data[interactionData.componentTypes[1]]
-                        [interactionData.componentIDs[0]] !== undefined)
-                    ? interactionData.componentIDs[1] === "anything"
-                        ? "( anything )"
-                        : $projectStore.data[interactionData.componentTypes[1]]
-                        [interactionData.componentIDs[1]].name
-                    : "";;
-                let combined: string = [interactionData.devName, actionText, stateText,
-                    componentText1, componentText2, interactionData.id]
+                let componentDevNames = ["", ""];
+                let componentNames = ["", ""];
+                for(const index of [0, 1]) {
+                    if(interactionData.componentIDs[index] === null) { continue; }
+                    if(interactionData.componentIDs[index] === "anything") {
+                        componentDevNames[index] = "( anything )";
+                        componentNames[index] = "( anything )";
+                        continue
+                    }
+                    const componentData = $projectStore.data[interactionData.componentTypes[0]]
+                        [interactionData.componentIDs[0]];
+                    if(componentData === undefined) { continue; }
+                    componentNames[index] = componentData.name;
+                    if((componentData as any).devName === undefined) { continue; }
+                    componentDevNames[index] = (componentData as any).devName;
+                }
+                combined = [interactionData.devName, actionText, stateText,
+                    ...componentDevNames, ...componentNames, interactionData.id]
                     .join("|").toLowerCase();
 
                 return $filterTextStore.toLowerCase().split(",")

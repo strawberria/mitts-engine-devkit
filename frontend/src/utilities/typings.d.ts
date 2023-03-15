@@ -7,10 +7,12 @@ export interface NavigationTabData {
     }
 }
 
-export interface ProjectData {
+export interface ReducedProjectData {
     custodial: {
         version: string;
     };
+}
+export interface ProjectData extends ReducedProjectData {
     game: {
         metadata: {
             title:    string;
@@ -68,6 +70,8 @@ export interface ProjectStateData extends ProjectConstruct {
     availableActionIDs:      string[];
     availableLocationIDs:    string[];
     hints:                   [ProjectHintData, ProjectHintData, ProjectHintData, ProjectHintData, ProjectHintData];
+    maxAttempts:             number;
+    transitionStateID:       string | null;
     // locationIDs: string[];   
 }
 

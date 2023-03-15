@@ -71,7 +71,10 @@ export function statesValid(projectData: ProjectData): [boolean, any] {
             description: stateData.description !== "",
             imageID: stateData.imageID !== null,
             hints: Object.values(stateData.hints)
-                .map(hintData => hintData.attempts === -1 || hintData.text !== "")
+                .map(hintData => hintData.attempts === -1 
+                    || (hintData.text !== "" && hintData.attempts > -1)),
+            transition: stateData.maxAttempts === -1 
+                || (stateData.transitionStateID !== null && stateData.maxAttempts > -1),
         }
     }
 

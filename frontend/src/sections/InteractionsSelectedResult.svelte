@@ -32,7 +32,7 @@
         "showDialog": [["Dialog Text", "After seemingly hours of sawing with the rusty knife, you finally "
             + "manage to cut through the sturdy leather cuffs encircling your wrists.", "w-full"]],
         "locationAdd": [["Location", "", "w-2/3"]],
-        "locationRemove": [["Location", "", "w-2/3"]],
+        "locationRemove": [["Location", "", "w-2/3"], ["Backup Location", "", "w-2/3"]],
     };
     let interactionResultChoiceData: SelectChoiceData[] = [
         ...Object.keys(resultLabelPlaceholderClass).map(resultType => ({
@@ -106,10 +106,12 @@
         } else if(["setState"].includes($interactionResultTypeStore)) {
             resultSelectChoiceData[0] = stateChoiceData;
             resultSelectChoiceData[1] = [];            
-        } else if(["locationAdd", "locationRemove"].includes($interactionResultTypeStore)) {
-            // TODO add location once implemented
+        } else if(["locationAdd"].includes($interactionResultTypeStore)) {
             resultSelectChoiceData[0] = locationChoiceData;
             resultSelectChoiceData[1] = [];  
+        } else if(["locationRemove"].includes($interactionResultTypeStore)) {
+            resultSelectChoiceData[0] = locationChoiceData;
+            resultSelectChoiceData[1] = locationChoiceData;
         }
     }
     projectStore.subscribe(updateResultSelectChoiceData);
@@ -177,6 +179,15 @@
                             .data.results[$selectedInteractionResultIDStore].args[1]}
                         label={resultLabelPlaceholderClass[$interactionResultTypeStore][1][0]}
                         placeholder={resultLabelPlaceholderClass[$interactionResultTypeStore][1][1]}
+                        valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].results
+                            [$selectedInteractionResultIDStore].args[1]} />
+            {:else if ["locationRemove"]
+                .includes($interactionResultTypeStore)}
+                    <LabelSelect class={resultLabelPlaceholderClass[$interactionResultTypeStore][1][2]}
+                        bind:value={$projectStore.data.interactions[$selectedInteractionIDStore]
+                            .data.results[$selectedInteractionResultIDStore].args[1]}
+                        choicesData={resultSelectChoiceData[1]}
+                        label={resultLabelPlaceholderClass[$interactionResultTypeStore][1][0]}
                         valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].results
                             [$selectedInteractionResultIDStore].args[1]} />
             {/if}

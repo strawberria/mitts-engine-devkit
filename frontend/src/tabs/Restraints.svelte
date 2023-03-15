@@ -86,13 +86,13 @@
                         valid={$bundleValidStore.restraints.restraints[$selectedRestraintIDStore].examine} />
                 </svelte:fragment>
             </Section>
-            <Section nogrow={true}>
+            <!-- <Section nogrow={true}>
                 <svelte:fragment slot="content">
                     <p>
                         Tip: Tag restraints when convenient to simplify interactions (ex: designating 'cuttable' restraints)
                     </p>
                 </svelte:fragment>
-            </Section>
+            </Section> -->
             <RestraintsRestraintTagSelector />
         {/if}
     </SectionCol>

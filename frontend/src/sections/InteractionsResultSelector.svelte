@@ -37,7 +37,7 @@
 <!-- allowUnlinking={false} -->
 {#if $selectedInteractionIDStore !== null}
     <SectionRadio height={height}
-        label="Result"
+        label="Results"
         selectedIDStore={selectedInteractionResultIDStore}
         selectorRadioData={selectorRadioData}
         order={$projectStore.data.interactions[$selectedInteractionIDStore].order.results}

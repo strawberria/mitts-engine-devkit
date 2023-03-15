@@ -37,13 +37,13 @@
                         label={"Initially Revealed"} />
                 </svelte:fragment>
             </Section>
-            <Section nogrow={true}>
+            <!-- <Section nogrow={true}>
                 <svelte:fragment slot="content">
                     <p>
                         Tip: Tag objects when convenient to simplify interactions (ex: designating 'unreachable' objects)
                     </p>
                 </svelte:fragment>
-            </Section>
+            </Section> -->
             <ObjectsObjectTagSelector />
         {/if}
     </SectionCol>

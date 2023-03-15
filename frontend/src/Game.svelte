@@ -53,6 +53,7 @@
         $playthroughStore.stateID = previousStateID as string;
     }
     function continueState() {
+        previousStateID = $playthroughStore.stateID;
         const currentStateIndex = $gameDataStore.game.states.indexOf($playthroughStore.stateID);
         $playthroughStore.stateID = $gameDataStore.game.states[currentStateIndex+1]
     }
@@ -277,8 +278,13 @@
                         $playthroughStore.locationIDs.splice(locationIDIndex, 1);
                         orderedPlaythroughSort();
 
-                        // Replace current location with next available
-                        $playthroughStore.locationID = $playthroughStore.locationIDs[0];
+                        // Check whether backup location ID is set and available
+                        if(resultData.args[1] !== null 
+                            && $playthroughStore.locationIDs.indexOf(resultData.args[1]) !== -1) {
+                                $playthroughStore.locationID = resultData.args[1];
+                        } else {
+                            $playthroughStore.locationID = $playthroughStore.locationIDs[0];
+                        }
                     }
                 }
 
@@ -293,6 +299,18 @@
         return false;
     }
 
+    function handleInvalid() {
+        setDialog(invalidDialogText);
+        $playthroughStore.attempts++;
+        const stateData = $gameDataStore.data.states[$playthroughStore.stateID];
+        if(stateData.maxAttempts !== -1
+            && $playthroughStore.attempts === stateData.maxAttempts) {
+            // If maximum attempts met, then transition state
+            previousStateID = $playthroughStore.stateID;
+            $playthroughStore.stateID = stateData.transitionStateID;
+            $playthroughStore.attempts = 0;
+        }
+    }
     function handleClick(type: "action" | "restraints" | "restraintLocations" | "objects", id: string) {
         // Ignore any object and restraint click if action is not selected
         if($currentActionStore[0] === null && type !== "action") { 
@@ -319,8 +337,7 @@
                 if($currentComponent1Store[1] !== "restraintLocations") {
                     setDialog($currentComponent1Store[2].examine);
                 } else {
-                    setDialog(invalidDialogText);
-                    $playthroughStore.attempts++;
+                    handleInvalid();
                 }
 
                 resetActionComponentStores();
@@ -336,8 +353,7 @@
 
                 // If no match and reset, show "You can't do that! dialog"
                 if(!interactionFound) {
-                    setDialog(invalidDialogText);
-                    $playthroughStore.attempts++;
+                    handleInvalid();
                 }
             }
 
@@ -354,8 +370,7 @@
 
             const interactionFound = checkInteraction();
             if(!interactionFound) {
-                setDialog(invalidDialogText);
-                $playthroughStore.attempts++;
+                handleInvalid();
             }
 
             // Reset and terminate because max 2 arguments
@@ -451,8 +466,6 @@
                 }
         }
     }
-
-    let kofiDiv: any;
 </script>
 
 <svelte:head>
@@ -505,7 +518,6 @@
                     </div>
                 </svelte:fragment>
             </Section>
-            <div bind:this={kofiDiv} />
         </SectionCol>
         <SectionCol style="width: calc(40% - 0.75em)">
             <!-- Copied from LocationsMinimap -->

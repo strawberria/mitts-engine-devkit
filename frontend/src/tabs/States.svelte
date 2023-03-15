@@ -11,7 +11,7 @@
     import StatesStateSelector from "../sections/StatesStateSelector.svelte";
     import { selectedStateIDStore } from "../utilities/constants";
     import { bundleValidStore, projectStore } from "../utilities/project";
-    import type { ProjectActionData, ProjectImageData, SelectChoiceData, SelectorMultipleData } from "../utilities/typings";
+    import type { ProjectActionData, ProjectImageData, ProjectStateData, SelectChoiceData, SelectorMultipleData } from "../utilities/typings";
 
     const stateTypeChoiceData: SelectChoiceData[] = [
         { key: "normal", display: "Normal", enabled: true },
@@ -31,6 +31,18 @@
                 })),
         ];
     });
+
+    let stateChoiceData: SelectChoiceData[] = [];
+    projectStore.subscribe(projectData => {
+        stateChoiceData = [
+            { key: null, display: "", enabled: true },
+            ...projectData.game.states
+                .map((stateID): [string, ProjectStateData] => [stateID, projectData.data.states[stateID]])
+                .map(([stateID, stateData]): SelectChoiceData => ({
+                    key: stateID, display: stateData.devName, enabled: true
+                })),
+        ];
+    })
 
     let stateActionMultipleData: SelectorMultipleData[] = [];
     projectStore.subscribe(projectData => {
@@ -100,11 +112,11 @@
     </SectionCol>
     <SectionCol style="width: calc(35% - 0.75rem)">
         {#if $selectedStateIDStore !== null}
-            <Section nogrow={true}>
+            <!-- <Section nogrow={true}>
                 <svelte:fragment slot="content">
                     <p>Tip: Set hint required attempts to -1 to disable each hint</p>
                 </svelte:fragment>
-            </Section>
+            </Section> -->
             <Section label="Hints" 
                 nogrow={true}>
                 <svelte:fragment slot="content">
@@ -113,7 +125,7 @@
                             <LabelNumberInput class="w-16"
                                 bind:value={$projectStore.data.states[$selectedStateIDStore].hints[index].attempts}
                                 label={"Attempts"}
-                                placeholder={hintPlaceholderText[index]}
+                                placeholder="-1"
                                 valid={$bundleValidStore.states.states[$selectedStateIDStore].hints[index]} />
                             <LabelTextInput class="grow"
                                 bind:value={$projectStore.data.states[$selectedStateIDStore].hints[index].text}
@@ -122,6 +134,24 @@
                                 valid={$bundleValidStore.states.states[$selectedStateIDStore].hints[index]} />
                         </div>
                     {/each}
+                </svelte:fragment>
+            </Section>
+            <Section nogrow={true}>
+                <svelte:fragment slot="content">
+                    <p class="text-sm">Transition to state after maximum attempts reached</p>
+                    {$bundleValidStore.states.states[$selectedStateIDStore].transition}
+                    <div class="flex flex-row w-full space-x-3">
+                        <LabelNumberInput class="w-16"
+                            bind:value={$projectStore.data.states[$selectedStateIDStore].maxAttempts}
+                            label={"Attempts"}
+                            placeholder="-1"
+                            valid={$bundleValidStore.states.states[$selectedStateIDStore].transition} />
+                        <LabelSelect class="grow" 
+                            bind:value={$projectStore.data.states[$selectedStateIDStore].transitionStateID}
+                            choicesData={stateChoiceData}
+                            label={"Transition State"} 
+                            valid={$bundleValidStore.states.states[$selectedStateIDStore].transition} />
+                    </div> 
                 </svelte:fragment>
             </Section>
             <!-- <Section /> -->

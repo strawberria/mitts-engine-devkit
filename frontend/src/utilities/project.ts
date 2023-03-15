@@ -1,7 +1,7 @@
 import _ from "lodash-es"
 import { Writable, get, writable } from "svelte/store";
 import { ExportProject, ImportProject } from "../../wailsjs/go/main/Bridge"
-import type { ProjectData, StoredData } from "./typings";
+import type { ProjectData, ReducedProjectData, StoredData } from "./typings";
 import { engineVersion, randomIDLength, selectedActionIDStore, selectedImageIDStore, 
     selectedRestraintIDStore, selectedRestraintLocationIDStore, selectedStateIDStore, 
     selectedObjectIDStore, selectedInteractionIDStore, pulseImportStore,
@@ -65,11 +65,38 @@ projectStore.subscribe(projectData => {
 
 let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
+// Patch projects from older versions based on array
+function patchProject(projectData: ReducedProjectData): ProjectData {
+    let updatedProjectData: ProjectData = projectData as any;
+    if(["0.1.0","0.2.0"].includes(updatedProjectData.custodial.version)) { // -> 0.3.0
+        // Add default maximum attempts and transition state ID for states
+        for(const stateData of Object.values(updatedProjectData.data.states)) {
+            if(stateData.maxAttempts === undefined) { stateData.maxAttempts = -1; }
+            if(stateData.transitionStateID === undefined) { stateData.transitionStateID = null; }
+        }
+        updatedProjectData.custodial.version = "0.3.0";
+    } 
+    if(["0.3.0"].includes(updatedProjectData.custodial.version)) { // -> 0.3.1
+        // Add null second argument to any "locationRemove" interaction results 
+        for(const interactionData of Object.values(updatedProjectData.data.interactions)) {
+            for(const resultData of Object.values(interactionData.data.results)) {
+                if(resultData.type === "locationRemove") {
+                    resultData.args[1] = null;
+                }
+            }
+        }
+        updatedProjectData.custodial.version = "0.3.1";
+    }
+
+    return updatedProjectData;
+}
+
 class MutateProject {
     async importProject() {
         const rawProjectData = await ImportProject(); 
         if(rawProjectData === "") { return; }
-        const projectData: ProjectData = JSON.parse(rawProjectData);
+        const projectData: any = JSON.parse(rawProjectData);
+        const patchedProjectData = patchProject(projectData);
 
         pulseImportStore.set(true);
 
@@ -91,13 +118,9 @@ class MutateProject {
         await sleep(50);
 
         pulseImportStore.set(false);
-        projectStore.set(projectData);
+        projectStore.set(patchedProjectData);
     }
     async exportProject() {
-        projectStore.update(d => {
-            d.custodial.version = engineVersion;
-            return d;
-        })
         const rawProjectData = JSON.stringify(get(projectStore));
         await ExportProject(rawProjectData);
     }

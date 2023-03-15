@@ -18,7 +18,7 @@
     <p class="pl-3 pr-3 pb-0.5
         text-xl font-medium text-slate-300 hover:text-slate-350
         cursor-pointer hover:underline">
-        Captive-Engine Development Kit
+        Mitts-Engine Development Kit
     </p>
     <p class="text-l text-slate-300 
         pointer-events-none">

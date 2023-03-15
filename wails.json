@@ -1,6 +1,6 @@
 {
-  "name": "Captive Development",
-  "outputfilename": "captive-dev",
+  "name": "Mitts-Engine Development Kit",
+  "outputfilename": "mitts-engine_devkit",
   "frontend:install": "npm install",
   "frontend:build": "npm run build",
   "frontend:dev:watcher": "npm run dev",
