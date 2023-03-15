@@ -275,16 +275,25 @@
                 } else if(resultData.type === "locationRemove") {
                     const locationIDIndex = $playthroughStore.locationIDs.indexOf(resultData.args[0]);
                     if(locationIDIndex !== -1) {
+                        if(resultData.args[1] !== null
+                            && !$playthroughStore.locationIDs.includes(resultData.args[1])) {
+                                // Backup functionality: add backup location if not already included
+                                $playthroughStore.locationIDs.push(resultData.args[1]);
+                                orderedPlaythroughSort(); // Necessary?
+                        }
+
+                        if($playthroughStore.locationID === resultData.args[0]) {
+                            // Replace location ID with backup / first if currently selected
+                            if(resultData.args[1] !== null) {
+                                $playthroughStore.locationID = resultData.args[1];
+                            } else {
+                                $playthroughStore.locationID = $playthroughStore.locationIDs
+                                    .filter(id => id !== resultData.args[0])[0];
+                            }
+                        }
+
                         $playthroughStore.locationIDs.splice(locationIDIndex, 1);
                         orderedPlaythroughSort();
-
-                        // Check whether backup location ID is set and available
-                        if(resultData.args[1] !== null 
-                            && $playthroughStore.locationIDs.indexOf(resultData.args[1]) !== -1) {
-                                $playthroughStore.locationID = resultData.args[1];
-                        } else {
-                            $playthroughStore.locationID = $playthroughStore.locationIDs[0];
-                        }
                     }
                 }
 

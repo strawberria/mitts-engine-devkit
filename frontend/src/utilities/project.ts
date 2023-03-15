@@ -87,6 +87,9 @@ function patchProject(projectData: ReducedProjectData): ProjectData {
         }
         updatedProjectData.custodial.version = "0.3.1";
     }
+    if(["0.3.1"].includes(updatedProjectData.custodial.version)) { // -> 0.3.2
+        updatedProjectData.custodial.version = "0.3.2";
+    }
 
     return updatedProjectData;
 }

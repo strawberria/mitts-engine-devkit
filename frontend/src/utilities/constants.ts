@@ -1,6 +1,6 @@
 import { Writable, writable } from "svelte/store";
 
-export const engineVersion = "0.3.1"
+export const engineVersion = "0.3.2"
 export const randomIDLength = 8;
 
 // Currently hardcoded, no easy way around (importing components here is whack)

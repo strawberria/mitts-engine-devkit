@@ -1,5 +1,5 @@
 <h2 align="center">
-    <b>Mitts-Engine Development Kit</b> (v0.3.0)
+    <b>Mitts-Engine Development Kit</b> (v0.3.2)
 </h2>
 <p align="center">
     Development kit assisting with creating DiD escape games using the <i>Mitts-Engine</i><br />
@@ -41,4 +41,7 @@
     - Fixed bug causing interactions filter to not work properly
 - **0.3.1 - Added backup location to `locationRemove` interaction result for seamless 'replacement' of minimap locations**
     - Make sure to `locationAdd` the new location before `locationRemove` the old location, setting the "Backup Location" to the newly added location - this results in a seamless 'update' of the minimap.
-    
+- **0.3.2 - Fixed issues with `locationRemove` interaction result**
+    - Fixed currently selected minimap location not being preserved if other is removed
+    - Fixed location ID not resetting properly on location being removed if it's the first 
+    - Also added backup functionality when "Backup Location" is selected - if backup location is currently not accessible by the player, it's added (works identically to `locationAdd`)
