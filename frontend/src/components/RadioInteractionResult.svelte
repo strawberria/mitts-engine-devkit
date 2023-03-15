@@ -1,0 +1,65 @@
+<script lang="ts">
+    import { recursiveCheckValid } from "../utilities/validation";
+    import { createEventDispatcher } from "svelte";
+    import { bundleValidStore } from "../utilities/project";
+    import { selectedInteractionIDStore } from "../utilities/constants";
+    import type { ProjectInteractionResultData } from "../utilities/typings";
+
+    export let id: string;
+    export let selected: boolean;
+    export let data: ProjectInteractionResultData;
+    let customClass: string;
+    export { customClass as class };
+
+    const dispatch = createEventDispatcher();
+    function handleClick() { dispatch("dispatchClick", { id: id }); }
+
+    let valid = false;
+    function updateValid() {
+        if($selectedInteractionIDStore === null
+            || $bundleValidStore.interactions.interactions[$selectedInteractionIDStore] === undefined) { 
+                return; 
+        }
+        window["bundleValidStore"] = $bundleValidStore;
+        valid = recursiveCheckValid($bundleValidStore.interactions
+            .interactions[$selectedInteractionIDStore].results[id]); 
+    }
+    bundleValidStore.subscribe(updateValid);
+    $: { id; data; updateValid(); }
+</script>
+
+<div class={`flex flex-row space-x-1
+    rounded border items-center
+    p-2 pl-4 pr-4
+    ${customClass} ${selected === true
+        ? ("text-slate-300 bg-slate-700 " + (valid 
+            ? "border-slate-500" : "border-red-700"))
+        : ("text-slate-400 bg-slate-750 " + (valid
+            ? "border-slate-600" : "border-red-900"))}`}
+    on:click={handleClick}>
+    <div class="flex flex-col w-full">
+        <p class="text-left w-11/12 min-w-0 truncate h-6">
+            {data.devName}
+        </p>
+        <p class={`text-left w-11/12 min-w-0 text-sm truncate h-5
+            ${selected === true ? "text-slate-400" : "text-slate-500"}`}>
+            {data.type}
+            <!-- {#if data.actionID !== null}
+                {$projectStore.data.actions[data.actionID].name}
+                {data.componentIDs[0] !== null && data.componentIDs[1] === null
+                    ? `[${$projectStore.data[data.componentTypes[0]][data.componentIDs[0]].devName}]`
+                    : data.componentIDs[0] !== null && data.componentIDs[1] !== null
+                        ? `${$projectStore.data.actions[data.actionID].verb} [${$projectStore.data[data.componentTypes[0]][data.componentIDs[0]].devName}]
+                            ${$projectStore.data.actions[data.actionID].verb} 
+                            [${$projectStore.data[data.componentTypes[1]][data.componentIDs[1]].devName}]`
+                        : ""}
+            {/if} -->
+        </p>
+    </div>
+    <div class="grow" />
+    <p class={`font-mono ${selected === true
+        ? "text-slate-500"
+        : "text-slate-600"}`}>
+        {id}
+    </p>
+</div>
