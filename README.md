@@ -39,4 +39,6 @@
     - Added 'maximum attempts' feature per-state which automatically transitions states when maximum attempts is reached, which is useful for implementing time-based bad ends (and also optimization-heavy puzzles eventually?)
     - Added automatic transpilation from older versions (currently 0.1.0/0.2.0 to 0.3.0) which adds/modifies/removes the necessary data from the project before updating the officially supported engine version
     - Fixed bug causing interactions filter to not work properly
+- **0.3.1 - Added backup location to `locationRemove` interaction result for seamless 'replacement' of minimap locations**
+    - Make sure to `locationAdd` the new location before `locationRemove` the old location, setting the "Backup Location" to the newly added location - this results in a seamless 'update' of the minimap.
     
