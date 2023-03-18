@@ -1,6 +1,7 @@
 <script lang="ts">
     export let height = null;
     export let width = null;
+    export let hidden = false;
     export let nogrow = false;
     export let nowidth = false;
     // Hacky workaround for when header forcibly defined but empty
@@ -22,23 +23,25 @@
     bg-slate-800
     ${customClass}
     ${height === null && width === null && nogrow === false && customStyle === "" ? "grow" : ""}`}
-    style={`${customStyle}; ` + (width !== null ? `width: ${width}%;` : "")
+    style={`${customStyle}; ${hidden ? "visibility: hidden; " : ""}` + (width !== null ? `width: ${width}%;` : "")
         + (height !== null ? `height: ${height}%;` : "")}
     on:click={onclick}>
-    {#if label !== ""}
-        <div class={`flex flex-row w-full
-            select-none mt-1 
-            ${smallHeader ? "px-2" : "px-4"}
-            ${$$slots["pre-content"] || smallHeader ? "mb-1" : "mb-2"}`}>
-            <div class={`flex flex-col justify-center ${$$slots.header && !noheader ? "" : "w-full"}`}>
-                <p class={smallHeader ? "text-lg font-semibold" : "text-xl"}>{label}</p>
+    {#if !hidden}
+        {#if label !== ""}
+            <div class={`flex flex-row w-full
+                select-none mt-1 
+                ${smallHeader ? "px-2" : "px-4"}
+                ${$$slots["pre-content"] || smallHeader ? "mb-1" : "mb-2"}`}>
+                <div class={`flex flex-col justify-center ${$$slots.header && !noheader ? "" : "w-full"}`}>
+                    <p class={smallHeader ? "text-lg font-semibold" : "text-xl"}>{label}</p>
+                </div>
+                <div class="grow" />
+                <slot name="header" />
             </div>
-            <div class="grow" />
-            <slot name="header" />
+        {/if}
+        <slot name="pre-content" />
+        <div class={`flex flex-col w-full space-y-2 text-slate-400 ${innerClass}`}>
+            <slot name="content" />
         </div>
     {/if}
-    <slot name="pre-content" />
-    <div class={`flex flex-col w-full space-y-2 text-slate-400 ${innerClass}`}>
-        <slot name="content" />
-    </div>
 </div>

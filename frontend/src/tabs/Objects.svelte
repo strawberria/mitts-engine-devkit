@@ -12,7 +12,7 @@
 </script>
 
 <SectionRow height={100}>
-    <SectionCol width={30}>
+    <SectionCol width={35}>
         <ObjectsObjectSelector height={100}/>
     </SectionCol>
     <SectionCol style="width: calc(35% - 0.75em)">
@@ -28,8 +28,12 @@
                         label={"Name"}
                         placeholder={"Small Key"}
                         valid={$bundleValidStore.objects.objects[$selectedObjectIDStore].name} />
+                    <LabelTextInput bind:value={$projectStore.data.objects[$selectedObjectIDStore].sentencePhrase}
+                        label={"Sentence Phrase"}
+                        placeholder={"the small key"}
+                        valid={$bundleValidStore.objects.objects[$selectedObjectIDStore].sentencePhrase} />
                     <LabelTextArea bind:value={$projectStore.data.objects[$selectedObjectIDStore].examine}
-                        rows={4}
+                        rows={6}
                         label={"Examine Text"}
                         placeholder={"A small key with a star-shaped end - hopefully it fits at least one of the locks on your restraints."}
                         valid={$bundleValidStore.objects.objects[$selectedObjectIDStore].examine} />
@@ -46,8 +50,5 @@
             </Section> -->
             <ObjectsObjectTagSelector />
         {/if}
-    </SectionCol>
-    <SectionCol style="width: calc(35% - 0.75em)">
-        
     </SectionCol>
 </SectionRow>

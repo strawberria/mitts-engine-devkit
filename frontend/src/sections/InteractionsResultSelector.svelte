@@ -11,6 +11,8 @@
     function updateSelectorRadioData() {
         if($selectedInteractionIDStore === null) { return; }
         const interactionData = $projectStore.data.interactions[$selectedInteractionIDStore];
+        if(interactionData === undefined) { return; }
+
         selectorRadioData = interactionData.order.results
             .map((interactionResultID): [string, ProjectInteractionResultData] => 
                 [interactionResultID, interactionData.data.results[interactionResultID]])

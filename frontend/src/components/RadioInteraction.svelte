@@ -30,11 +30,11 @@
         : ("text-slate-400 bg-slate-750 " + (valid
             ? "border-slate-600" : "border-red-900"))}`}
     on:click={handleClick}>
-    <div class="flex flex-col w-full">
-        <p class="text-left w-11/12 min-w-0 truncate h-6">
+    <div class="flex flex-col min-w-0">
+        <p class="text-left min-w-0 h-6 truncate">
             {data.devName}
         </p>
-        <p class={`text-left w-11/12 min-w-0 text-sm truncate h-5
+        <p class={`text-left min-w-0 text-sm truncate h-5
             ${selected === true ? "text-slate-400" : "text-slate-500"}`}>
             {#if data.actionID !== null}
                 {@const componentText1 = data.componentIDs[0] === "anything"
@@ -67,3 +67,13 @@
         {id}
     </p>
 </div>
+
+<style>
+    /* .line-clamp {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical; 
+        overflow: hidden;
+        text-overflow: ellipsis;
+    } */
+</style>

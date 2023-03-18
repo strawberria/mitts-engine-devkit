@@ -15,6 +15,7 @@
     function updateSelectorRadioData() { 
         if($selectedObjectIDStore === null) { return; }
         selectorRadioData = Object.entries($projectStore.data.objects[$selectedObjectIDStore].tags)
+            .sort((a, b) => a[1].localeCompare(b[1]))
             .map(([index, tag]): SelectorRadioData => ({
                 id: index,
                 component: RadioObjectTag,
@@ -41,7 +42,7 @@
     }
 </script>
 
-<SectionRadio class="min-h-0" 
+<SectionRadio class="shrink basis-0"  
     height={height} 
     label="Object Tags"
     nobuttons={true}

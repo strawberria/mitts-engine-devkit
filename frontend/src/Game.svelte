@@ -8,6 +8,7 @@
     import SectionRow from "./components/SectionRow.svelte";
     import type { ProjectActionData, ProjectData, ProjectLocationData, ProjectObjectData, ProjectRestraintData, ProjectRestraintLocationData, ProjectStateData, SelectChoiceData } from "./utilities/typings";
     import { onMount } from "svelte";
+    import SpacedSvelteMarkdown from "./components/SpacedSvelteMarkdown.svelte";
 
     let previousStateID: string | null = null;
     export let gameDataStore: Writable<ProjectData>;
@@ -54,8 +55,10 @@
     }
     function continueState() {
         previousStateID = $playthroughStore.stateID;
-        const currentStateIndex = $gameDataStore.game.states.indexOf($playthroughStore.stateID);
-        $playthroughStore.stateID = $gameDataStore.game.states[currentStateIndex+1]
+        // Set current state to state specified in transitionState
+        $playthroughStore.stateID = $gameDataStore.data.states[$playthroughStore.stateID].transitionStateID;
+        // const currentStateIndex = $gameDataStore.game.states.indexOf($playthroughStore.stateID);
+        // $playthroughStore.stateID = $gameDataStore.game.states[currentStateIndex+1]
     }
     let playthroughStore: Writable<PlaythroughData> = writable(resetPlaythrough());
 
@@ -140,7 +143,9 @@
 
     // Checks whether the current action and components match any interactions
     // If so, execute results and return true
-    function checkInteraction(): boolean {
+    function checkInteraction(): [boolean, boolean] {
+        let interactionResult = false;
+        let dialogShown = false;
         const orderedInteractionData = $gameDataStore.game.interactions
             .map((interactionID) => $gameDataStore.data.interactions[interactionID]);
         for(const interactionData of orderedInteractionData) {
@@ -157,10 +162,12 @@
             // Check whether component 1 and 2 mismatch
             // Yes, I can't be bothered to iterate index this, yawn
             const component1Matches1 = interactionData.componentIDs[0] === "anything"
-                ? $currentComponent1Store[0] !== null
+                ? ($currentComponent1Store[0] !== null 
+                    && $currentComponent1Store[1] === interactionData.componentTypes[0])
                 : interactionData.componentIDs[0] === $currentComponent1Store[0];
             const component2Matches2 = interactionData.componentIDs[1] === "anything"
-                ? $currentComponent2Store[0] !== null
+                ? ($currentComponent2Store[0] !== null 
+                    && $currentComponent2Store[1] === interactionData.componentTypes[1])
                 : interactionData.componentIDs[1] === $currentComponent2Store[0];
             if(!component1Matches1 || !component2Matches2) {
                 // Immediately return if order forced and 1/2 can't be exchanged
@@ -196,7 +203,9 @@
                         && (xor(
                             $playthroughStore.objectIDs
                                 .map((objectID) => $gameDataStore.data.objects[objectID])
-                                .some((objectData) => objectData.tags.includes(criteriaData.args[0])),
+                                .some((objectData) => criteriaData.args[0].split(",")
+                                    .map(tag => tag.trim())
+                                    .some(tag => objectData.tags.includes(tag))),
                             criteriaData.type === "objectNotFoundTag"
                         )))
                     || (["restraintWearing", "restraintNotWearing"].includes(criteriaData.type)
@@ -208,18 +217,24 @@
                         && (xor(
                             Object.values($playthroughStore.restraints)
                                 .map((restraintID) => $gameDataStore.data.restraints[restraintID])
-                                .some((restraintData) => restraintData.tags.includes(criteriaData.args[0])),
+                                .some((restraintData) => criteriaData.args[0].split(",")
+                                    .map(tag => tag.trim())
+                                    .some(tag => restraintData.tags.includes(tag))),
                             criteriaData.type === "restraintNotWearingTag"
                         )))
                     // Not sure how these should interact with interchangeable interaction components
                     || (criteriaData.type === "targetTag_component1"
                         && $currentComponent1Store[0] !== null
                         && $currentComponent1Store[1] !== "restraintLocations"
-                        && $currentComponent1Store[2].tags.includes(criteriaData.args[0]))
+                        && criteriaData.args[0].split(",")
+                            .map(tag => tag.trim())
+                            .some(tag => ($currentComponent1Store[2] as any).tags.includes(tag)))
                     || (criteriaData.type === "targetTag_component2"
                         && $currentComponent2Store[0] !== null
                         && $currentComponent2Store[1] !== "restraintLocations"
-                        && $currentComponent2Store[2].tags.includes(criteriaData.args[0]));
+                        && criteriaData.args[0].split(",")
+                            .map(tag => tag.trim())
+                            .some(tag => ($currentComponent2Store[2] as any).tags.includes(tag)))
 
                 if(matches === false) { 
                     allCriteriasMatch = false;
@@ -240,15 +255,25 @@
                     const restraintData = $gameDataStore.data.restraints[resultData.args[0]];
                     $playthroughStore.restraints[restraintData.restraintLocationID] = resultData.type === "restraintAdd"
                         ? resultData.args[0] : null;
-                } else if(["restraintAddTarget", "restraintRemoveTarget"].includes(resultData.type)) {
+                } else if(["addRevealTarget", "removeHideTarget"].includes(resultData.type)) {
                     // Check whether component ID at given index 0/1 is a valid target
                     const currentComponentData = get(resultData.args[0] === 0
                         ? currentComponent1Store
                         : currentComponent2Store);
                     if(currentComponentData[1] === "restraints") {
                         const restraintData = currentComponentData[2] as ProjectRestraintData;
-                        $playthroughStore.restraints[restraintData.restraintLocationID] = resultData.type === "restraintAddTarget"
+                        $playthroughStore.restraints[restraintData.restraintLocationID] = resultData.type === "addRevealTarget"
                             ? resultData.args[0] : null;
+                    } else { // if(currentComponentData[1] === "objects")
+                        if(resultData.type === "addRevealTarget") {
+                            $playthroughStore.objectIDs.push(resultData.args[0])   
+                        } else {
+                            const objectIDIndex = $playthroughStore.objectIDs.indexOf(resultData.args[0]);
+                            if(objectIDIndex !== -1) {
+                                $playthroughStore.objectIDs.splice(objectIDIndex, 1);
+                            }
+                        }
+                        orderedPlaythroughSort();
                     }
                 } else if(resultData.type === "objectReveal" 
                     && $playthroughStore.objectIDs.includes(resultData.args[0]) === false) {
@@ -267,7 +292,30 @@
                 } else if(resultData.type === "setFlag") {
                     $playthroughStore.flags[resultData.args[0]] = resultData.args[1];
                 } else if(resultData.type === "showDialog") {
-                    setDialog(resultData.args[0]);
+                    let modifiedText = resultData.args[0];
+                    for(const [replaceText, captureText] of modifiedText.matchAll(/{{(.+?)}}/g)) {
+                        if(captureText === "component1" && $currentComponent1Store[0] !== null) {
+                            modifiedText = modifiedText.replace(replaceText, $currentComponent1Store[2].sentencePhrase);    
+                        } else if(captureText === "component2" && $currentComponent2Store[0] !== null) {
+                            modifiedText = modifiedText.replace(replaceText, $currentComponent2Store[2].sentencePhrase);
+                        } else {
+                            const restraintLocationMatch = replaceText.match(/{{restraintAtLocation:(.+)}}/)
+                            if(restraintLocationMatch === null) { continue; }
+                            const restraintLocationName = restraintLocationMatch[1];
+                            const restraintLocationID = Object.values($gameDataStore.data.restraintLocations)
+                                .filter(locationData => locationData.name.toLowerCase() === restraintLocationName.toLowerCase())
+                                [0].id;
+                            if(restraintLocationID === undefined) { continue; }
+                            const restraintAtLocationID = $playthroughStore.restraints[restraintLocationID];
+                            if(!restraintAtLocationID) { continue; }
+                            const restraintAtLocationPhrase = $gameDataStore.data.restraints[restraintAtLocationID].sentencePhrase;
+
+                            modifiedText = modifiedText.replace(replaceText, restraintAtLocationPhrase);
+                        }
+                    }
+
+                    setDialog(modifiedText);
+                    dialogShown = true;
                 } else if(resultData.type === "locationAdd"
                     && $playthroughStore.locationIDs.includes(resultData.args[0]) === false) {
                         $playthroughStore.locationIDs.push(resultData.args[0]);
@@ -288,19 +336,25 @@
                     }
                 }
 
-                // Necessary because reactivity is really iffy
-                playthroughStore.set($playthroughStore);
+                
             }
 
-            return true;
+            // Necessary because reactivity is really iffy
+            playthroughStore.set($playthroughStore);
+            interactionResult = !interactionData.invalid;
+
+            return [interactionResult, dialogShown];
         }
         
         // No matches, return false
-        return false;
+        return [interactionResult, dialogShown];
     }
 
-    function handleInvalid() {
-        setDialog(invalidDialogText);
+    function handleInvalid(skipDialog: boolean = false) {
+        if(!skipDialog) {
+            setDialog(invalidDialogText);
+        }
+
         $playthroughStore.attempts++;
         const stateData = $gameDataStore.data.states[$playthroughStore.stateID];
         if(stateData.maxAttempts !== -1
@@ -333,11 +387,17 @@
                 $gameDataStore.data[type][id] as any,
             ];
 
-            if($currentActionStore[0] === "examine") {
+            if($currentActionStore[0] === "examine" 
+                || $currentActionStore[1].name === "Examine") {
                 if($currentComponent1Store[1] !== "restraintLocations") {
                     setDialog($currentComponent1Store[2].examine);
                 } else {
                     handleInvalid();
+                }
+
+                const [interactionResult, dialogSet] = checkInteraction();
+                if(interactionResult === false) {
+                    handleInvalid(dialogSet);
                 }
 
                 resetActionComponentStores();
@@ -345,7 +405,7 @@
                 return;
             }
 
-            const interactionFound = checkInteraction();
+            const [interactionFound, dialogSet] = checkInteraction();
 
             // If only 1 argument, reset and terminate
             if(interactionFound || $currentActionStore[1].two === false) {
@@ -353,7 +413,7 @@
 
                 // If no match and reset, show "You can't do that! dialog"
                 if(!interactionFound) {
-                    handleInvalid();
+                    handleInvalid(dialogSet);
                 }
             }
 
@@ -368,9 +428,9 @@
                 $gameDataStore.data[type][id] as any,
             ];
 
-            const interactionFound = checkInteraction();
+            const [interactionFound, dialogSet] = checkInteraction();
             if(!interactionFound) {
-                handleInvalid();
+                handleInvalid(dialogSet);
             }
 
             // Reset and terminate because max 2 arguments
@@ -411,17 +471,11 @@
     let canvasWidth: number;
     let canvasHeight: number;
     let context: CanvasRenderingContext2D;
-    function updateCanvasContext() {
-        if(canvas) { 
-            context = canvas.getContext("2d") as CanvasRenderingContext2D;
-        }
-    }
-    onMount(updateCanvasContext);
-    playthroughStore.subscribe(updateCanvasContext);
 
     // Renders a dumb number of times, can't do anything about it
     function handleMinimapClick(event?: MouseEvent) {
         // For efficiency, only re-render when tab is selected
+        if(canvas) { context = canvas.getContext("2d") as CanvasRenderingContext2D; }
         if(event === undefined || context === undefined || canvas === null) { return; }
 
         // Get absolute coordinates for checking click target
@@ -453,7 +507,7 @@
                 // Check whether click point is included within the path
                 if(context.isPointInPath(path, clickCoordX, clickCoordY)) {
                     // Reveal object and show dialog if defined
-                    if(minimapObjectData.objectID !== undefined
+                    if(minimapObjectData.objectID
                         && $playthroughStore.objectIDs.includes(minimapObjectData.objectID) === false) {
                         $playthroughStore.objectIDs.push(minimapObjectData.objectID);
                         orderedPlaythroughSort();
@@ -498,7 +552,7 @@
                             $gameDataStore.data.states[$playthroughStore.stateID].imageID
                         ].imageb64} />
                     <div class="whitespace-pre-wrap w-full text-left">
-                        <SvelteMarkdown source={$gameDataStore.data.states[$playthroughStore.stateID].description} />
+                        <SpacedSvelteMarkdown source={$gameDataStore.data.states[$playthroughStore.stateID].description} />
                     </div>
 
                     <div class="grow" />
@@ -523,7 +577,7 @@
             <!-- Copied from LocationsMinimap -->
             <div class="flex flex-col items-center justify-center grow">
                 {#if dialogText !== null}
-                    <Section class="select-none rounded-lg"
+                    <Section class="select-none rounded-2xl"
                         style="max-width: 80%" 
                         innerClass="whitespace-pre-wrap" 
                         nogrow={true}
@@ -534,7 +588,7 @@
                                 <p class="whitespace-pre-wrap underline">
                                     {dialogHeader}
                                 </p>
-                                <SvelteMarkdown source={dialogText} />
+                                <SpacedSvelteMarkdown source={dialogText} />
                                 <p class="text-xs text-slate-500">( Click anywhere to close )</p>
                             </div>
                         </svelte:fragment>
@@ -548,7 +602,7 @@
                 <svelte:fragment slot="header">
                     <div class="flex flex-col justify-end text-right">
                         <div class="h-6">
-                            <SvelteMarkdown source={$currentActionTextStore} />
+                            <SpacedSvelteMarkdown source={$currentActionTextStore} />
                         </div>
                     </div>
                 </svelte:fragment>
@@ -557,7 +611,6 @@
                         style={`grid-template-columns: repeat(auto-fill, minmax(${actionNameWidthEM}em, 6fr));
                         row-gap: 0.5em`}>
                         {#each [
-                                { "id": "examine", "name": "Examine" },
                                 ...$gameDataStore.game.actions
                                     .filter((actionID) => $gameDataStore.data.states[
                                         $playthroughStore.stateID].availableActionIDs
@@ -688,12 +741,12 @@
                 innerClass="items-center pt-2 pb-1.5 w-11/12">
                 <svelte:fragment slot="content">
                     <img class="mb-1 border border-slate-700 rounded"
-                        style="max-width: 60%; object-fit: contain"
+                        style="max-width: 80%; object-fit: contain"
                         src={$gameDataStore.data.images[
                             $gameDataStore.data.states[$playthroughStore.stateID].imageID
                         ].imageb64} />
-                    <div class="whitespace-pre-wrap w-full text-left pb-2">
-                        <SvelteMarkdown source={$gameDataStore.data.states[$playthroughStore.stateID].description} />
+                    <div class="whitespace-pre-wrap w-full pb-2">
+                        <SpacedSvelteMarkdown source={$gameDataStore.data.states[$playthroughStore.stateID].description} />
                     </div>
                     {#if $gameDataStore.data.states[$playthroughStore.stateID].type === "goodEnding"}
                         <IconButton label="Restart"

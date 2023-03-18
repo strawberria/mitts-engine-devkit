@@ -36,9 +36,9 @@
         : ("text-slate-400 bg-slate-750 " + (valid
             ? "border-slate-600" : "border-red-900"))}`}
     on:click={handleClick}>
-    <div class="flex flex-row items-center">
+    <div class="flex flex-row items-center min-w-0">
         <p class="text-left font-bold font-mono mr-4">{data.type ? "C" : ""}</p>
-        <p class="text-left w-11/12 min-w-0 truncate h-6">
+        <p class="text-left truncate h-6">
             {data.devName}
         </p>
     </div>

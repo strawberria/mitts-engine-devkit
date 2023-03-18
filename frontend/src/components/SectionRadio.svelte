@@ -41,7 +41,7 @@
     label={label}
     class={customClass}
     innerClass={`scrollbar-thin scrollbar-thumb-slate-700 overflow-x-hidden
-        pr-4
+        pr-4 shrink
         ${innerClass}`}
     style={customStyle}>
     <svelte:fragment slot="header">

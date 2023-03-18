@@ -13,29 +13,30 @@
 
 <SectionRow height={100}>
     <SectionCol width={30}>
-        <MetadataActionSelector height={60}/>
-        {#if $selectedActionIDStore !== null}
-            <Section label="Selected Action">
-                <svelte:fragment slot="content">
-                    <LabelTextInput bind:value={$projectStore.data.actions[$selectedActionIDStore].name}
-                        label={"Name"}
-                        placeholder={"Use"}
-                        valid={$bundleValidStore.metadata.actions[$selectedActionIDStore].name} />
-                    <LabelTextInput bind:value={$projectStore.data.actions[$selectedActionIDStore].verb}
-                        label={"Verb"}
-                        placeholder={"with"}
-                        valid={$bundleValidStore.metadata.actions[$selectedActionIDStore].verb} />
-                    <!-- <div class="flex flex-row space-x-6"> -->
-                    <LabelToggle bind:value={$projectStore.data.actions[$selectedActionIDStore].order}
-                        label={"Order Matters"} />
-                    <LabelToggle bind:value={$projectStore.data.actions[$selectedActionIDStore].two}
-                        label={"Optional Second Argument"} />
-                    <!-- </div> -->
-                </svelte:fragment>
-            </Section>
-        {/if}
+        <MetadataActionSelector />
+        <Section class="shrink-0" 
+            style="height: 19em" 
+            label="Selected Action"
+            hidden={$selectedActionIDStore === null}>
+            <svelte:fragment slot="content">
+                <LabelTextInput bind:value={$projectStore.data.actions[$selectedActionIDStore].name}
+                    label={"Name"}
+                    placeholder={"Use"}
+                    valid={$bundleValidStore.metadata.actions[$selectedActionIDStore].name} />
+                <LabelTextInput bind:value={$projectStore.data.actions[$selectedActionIDStore].verb}
+                    label={"Verb"}
+                    placeholder={"with"}
+                    valid={$bundleValidStore.metadata.actions[$selectedActionIDStore].verb} />
+                <!-- <div class="flex flex-row space-x-6"> -->
+                <LabelToggle bind:value={$projectStore.data.actions[$selectedActionIDStore].order}
+                    label={"Order Matters"} />
+                <LabelToggle bind:value={$projectStore.data.actions[$selectedActionIDStore].two}
+                    label={"Optional Second Argument"} />
+                <!-- </div> -->
+            </svelte:fragment>
+        </Section>
     </SectionCol>
-    <SectionCol style="width: calc(40% - 0.75em)">
+    <SectionCol style="width: calc(35% - 0.75em)">
         <Section label="Game Information">
             <svelte:fragment slot="content">
                 <LabelTextInput bind:value={$projectStore.game.metadata.title}
@@ -55,14 +56,14 @@
                         valid={$bundleValidStore.metadata.version} />
                 </div>
                 <LabelTextArea bind:value={$projectStore.game.metadata.synopsis}
-                    rows={10}
+                    rows={12}
                     label={"Synopsis"}
                     placeholder={"Mae awakens within a dark basement, alone and heavily restrained..."}
                     valid={$bundleValidStore.metadata.synopsis} />
             </svelte:fragment>
         </Section>
     </SectionCol>
-    <SectionCol style="width: calc(30% - 0.75em)">
+    <SectionCol style="width: calc(35% - 0.75em)">
         <Section nogrow={true}>
             <svelte:fragment slot="content">
                 <p>
@@ -76,5 +77,13 @@
                 <p>(other features currently not supported...)</p>
             </svelte:fragment>
         </Section>
+        <Section innerClass="grow">
+            <svelte:fragment slot="content">
+                <LabelTextArea class="grow" 
+                    bind:value={$projectStore.game.metadata.notes}
+                    label="Development Notes"
+                    valid={true} />
+            </svelte:fragment>
+        </Section> 
     </SectionCol>
 </SectionRow>

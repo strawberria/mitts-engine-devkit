@@ -11,6 +11,7 @@
     let interactionResultTypeStore: Writable<ProjectInteractionResultType> = writable("restraintAdd");
     function updateInteractionResultType() {
         if($selectedInteractionIDStore === null || $selectedInteractionResultIDStore === null
+            || $projectStore.data.interactions[$selectedInteractionIDStore] === undefined
             || $projectStore.data.interactions[$selectedInteractionIDStore]
                 .data.results[$selectedInteractionResultIDStore] === undefined) { return; }
         $interactionResultTypeStore = $projectStore.data.interactions[$selectedInteractionIDStore]
@@ -23,10 +24,10 @@
     let resultLabelPlaceholderClass: { [key in ProjectInteractionResultType]: [string, string, string][] } = {
         "restraintAdd": [["Restraint", "", "w-full"]],
         "restraintRemove": [["Restraint", "", "w-full"]],
-        "restraintAddTarget": [["Which Target", "", "w-1/2"]],
-        "restraintRemoveTarget": [["Which Target", "", "w-1/2"]],
-        "objectReveal": [["Object", "", "w-2/3"]],
-        "objectHide": [["Object", "", "w-2/3"]],
+        "addRevealTarget": [["Which Target", "", "w-1/2"]],
+        "removeHideTarget": [["Which Target", "", "w-1/2"]],
+        "objectReveal": [["Object", "", "w-full"]],
+        "objectHide": [["Object", "", "w-full"]],
         "setState": [["State", "", "w-2/3"]],
         "setFlag": [["Flag Key", "doorStatus", "w-2/3"], ["Flag Value", "unlocked", "w-2/3"]],
         "showDialog": [["Dialog Text", "After seemingly hours of sawing with the rusty knife, you finally "
@@ -97,7 +98,7 @@
         } else if(["restraintAdd", "restraintRemove"].includes($interactionResultTypeStore)) {
             resultSelectChoiceData[0] = restraintChoiceData;
             resultSelectChoiceData[1] = [];            
-        } else if(["restraintAddTarget", "restraintRemoveTarget"].includes($interactionResultTypeStore)) {
+        } else if(["addRevealTarget", "removeHideTarget"].includes($interactionResultTypeStore)) {
             resultSelectChoiceData[0] = targetChoiceData;
             resultSelectChoiceData[1] = [];            
         } else if(["objectReveal", "objectHide"].includes($interactionResultTypeStore)) {
@@ -150,7 +151,7 @@
                             placeholder={resultLabelPlaceholderClass[$interactionResultTypeStore][0][1]}
                             valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].results
                                 [$selectedInteractionResultIDStore].args[0]} />
-            {:else if ["restraintAdd", "restraintRemove", "restraintAddTarget", "restraintRemoveTarget", 
+            {:else if ["restraintAdd", "restraintRemove", "addRevealTarget", "removeHideTarget", 
                 "objectReveal", "objectHide", "setState", "locationAdd", "locationRemove"]
                     .includes($interactionResultTypeStore)}
                         <LabelSelect class={resultLabelPlaceholderClass[$interactionResultTypeStore][0][2]}

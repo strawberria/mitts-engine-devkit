@@ -21,7 +21,7 @@
     $: { id; data; updateValid(); }
 </script>
 
-<div class={`flex flex-row justify-between space-x-1
+<div class={`flex flex-row space-x-1
     rounded border 
     p-2 pl-4 pr-4
     ${customClass} ${selected === true
@@ -30,13 +30,14 @@
         : ("text-slate-400 bg-slate-750 " + (valid
             ? "border-slate-600" : "border-red-900"))}`}
     on:click={handleClick}>
-    <p class="text-left w-11/12 min-w-0 truncate">
+    <p class="text-left min-w-0 truncate">
         {data.name} {data.verb !== ""
             ? `[A] ${data.verb} [B]` 
             : data.name !== ""
                 ? "[A]" 
                 : ""}
     </p>
+    <div class="grow" />
     <p class={`font-mono ${selected === true
         ? "text-slate-500"
         : "text-slate-600"}`}>

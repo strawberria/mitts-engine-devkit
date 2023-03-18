@@ -21,8 +21,9 @@ export const projectStore: Writable<ProjectData> = writable<ProjectData>({
             author: "",
             version: "",
             synopsis: "",
+            notes: "",
         },
-        actions: [],
+        actions: ["examine"],
         images: [],
         states: [],
         restraintLocations: [],
@@ -32,7 +33,9 @@ export const projectStore: Writable<ProjectData> = writable<ProjectData>({
         locations: [],
     },
     data: {
-        actions: {},
+        actions: {
+            "examine": { id: "examine", name: "Examine", verb: "", order: false, two: false }
+        },
         images: {},
         states: {},
         restraintLocations: {},
@@ -74,6 +77,7 @@ function patchProject(projectData: ReducedProjectData): ProjectData {
             if(stateData.maxAttempts === undefined) { stateData.maxAttempts = -1; }
             if(stateData.transitionStateID === undefined) { stateData.transitionStateID = null; }
         }
+
         updatedProjectData.custodial.version = "0.3.0";
     } 
     if(["0.3.0"].includes(updatedProjectData.custodial.version)) { // -> 0.3.1
@@ -85,7 +89,41 @@ function patchProject(projectData: ReducedProjectData): ProjectData {
                 }
             }
         }
+        // Add missing maxAttempts and transitionStateID from state data
+        for(const stateData of Object.values(updatedProjectData.data.states)) {
+            stateData.maxAttempts = stateData.maxAttempts ?? -1;
+            stateData.transitionStateID = stateData.transitionStateID ?? null;
+        }
+
         updatedProjectData.custodial.version = "0.3.1";
+    }
+    if(["0.3.1", "0.3.2"].includes(updatedProjectData.custodial.version)) { // -> 0.4.0
+        // Add development notes to metadata
+        updatedProjectData.game.metadata.notes = updatedProjectData.game.metadata.notes ?? "";
+
+        // Add sentencePhrase to restraint locations, restraints, and objects
+        for(const restraintLocationData of Object.values(updatedProjectData.data.restraintLocations)) {
+            restraintLocationData.sentencePhrase = restraintLocationData.sentencePhrase ?? "";
+        }
+        for(const restraintData of Object.values(updatedProjectData.data.restraints)) {
+            restraintData.sentencePhrase = restraintData.sentencePhrase ?? "";
+        }
+        for(const objectData of Object.values(updatedProjectData.data.objects)) {
+            objectData.sentencePhrase = objectData.sentencePhrase ?? "";
+        }
+
+        // Add default examine action for ease of development
+        if(updatedProjectData.game.actions.includes("examine") === false) {
+            updatedProjectData.game.actions.unshift("examine");
+            updatedProjectData.data.actions["examine"] = { id: "examine", name: "Examine", verb: "", order: false, two: false };
+        }
+
+        // Add invalid=false to all interaction data if not included
+        for(const interactionData of Object.values(updatedProjectData.data.interactions)) {
+            interactionData.invalid = interactionData.invalid ?? false;
+        }
+
+        updatedProjectData.custodial.version = "0.4.0";
     }
 
     return updatedProjectData;
@@ -164,6 +202,8 @@ class MutateProject {
                     // Could cause issues with arrays?
                     currentData[key] = Array.isArray(currentData)
                         ? undefined : null;
+                } else if(key == oldSelectedID) {
+                    delete currentData[key];
                 }
             }
         }

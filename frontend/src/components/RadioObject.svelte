@@ -30,14 +30,14 @@
         : ("text-slate-400 bg-slate-750 " + (valid
             ? "border-slate-600" : "border-red-900"))}`}
     on:click={handleClick}>
-    <div class="flex flex-col w-full">
+    <div class="flex flex-col min-w-0">
         <div class="flex flex-row items-center">
             <p class="text-left font-bold font-mono mr-2 w-2">{data.initial ? "I" : ""}</p>
-            <p class="text-left w-11/12 min-w-0 truncate h-6">
+            <p class="text-left truncate h-6">
                 {data.devName}
             </p>
         </div>
-        <p class={`text-left text-sm w-11/12 min-w-0 truncate h-5
+        <p class={`text-left text-sm truncate h-5
             ${selected === true ? "text-slate-400" : "text-slate-500"}`}>
             {data.name}
         </p>

@@ -95,6 +95,7 @@ export function restraintsValid(projectData: ProjectData): [boolean, any] {
     for(const [id, restraintLocationData] of Object.entries(projectData.data.restraintLocations)) {
         restraintLocationsValid[id] = {
             name: restraintLocationData.name !== "",
+            sentencePhrase: restraintLocationData.sentencePhrase !== "",
         }
     }
 
@@ -103,6 +104,7 @@ export function restraintsValid(projectData: ProjectData): [boolean, any] {
         restraintsValid[id] = {
             name: restraintData.name !== "",
             devName: restraintData.devName !== "",
+            sentencePhrase: restraintData.sentencePhrase !== "",
             restraintLocationID: restraintData.restraintLocationID !== null,
             examine: restraintData.examine !== "",
         }
@@ -125,6 +127,7 @@ export function objectsValid(projectData: ProjectData): [boolean, any] {
         objectsValid[id] = {
             name: objectData.name !== "",
             devName: objectData.devName !== "",
+            sentencePhrase: objectData.sentencePhrase !== "",
             examine: objectData.examine !== "",
         }
     }
@@ -194,7 +197,7 @@ export function interactionsValid(projectData: ProjectData): [boolean, any] {
             } else if(["showDialog"].includes(interactionResultData.type)) {
                 interactionsValid[id].results[resultID].args[0] = alsoNotUndefined(interactionResultData.args[0], "");
                 interactionsValid[id].results[resultID].args[1] = true;
-            } else { // restraintAddTarget, restraintRemoveTarget
+            } else { // addRevealTarget, removeHideTarget
                 interactionsValid[id].results[resultID].args[0] = true;
                 interactionsValid[id].results[resultID].args[1] = true;
             }

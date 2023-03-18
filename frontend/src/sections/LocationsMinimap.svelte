@@ -1,12 +1,13 @@
 <script lang="ts">
     import type { ProjectLocationObjectData } from "src/utilities/typings";
     import { onMount } from "svelte";
-    import IconButton from "../components/IconButton.svelte";
     import Section from "../components/Section.svelte";
     import { selectedLocationIDStore, selectedLocationObjectIDStore, selectedTabStore } from "../utilities/constants";
     import { projectStore } from "../utilities/project";
 
+    let customClass: string = "";
     export let style: string = "";
+    export { customClass as class };
 
     // Setup variables for rendering minimap on canvas
     let canvas: HTMLCanvasElement;
@@ -157,8 +158,8 @@
 
 {#if $selectedLocationIDStore !== null}
     <!-- label="Minimap Preview" -->
-    <Section class="aspect-square pb-3" 
-        innerClass="flex flex-row items-center justify-center h-full min-h-0"
+    <Section class={`${customClass} aspect-square pb-3`} 
+        innerClass="flex flex-row items-center justify-center h-full min-h-0 mt-1"
         nogrow={true}>
         <svelte:fragment slot="content">
             <canvas class="h-full w-full bg-inherit

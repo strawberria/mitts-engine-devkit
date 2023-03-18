@@ -30,7 +30,7 @@
         : ("text-slate-400 bg-slate-750 " + (valid
             ? "border-slate-600" : "border-red-900"))}`}
     on:click={handleClick}>
-    <p class="text-left w-3/4 truncate">
+    <p class="text-left truncate min-w-0">
             {data.devName}
     </p>
     <div class="grow" />

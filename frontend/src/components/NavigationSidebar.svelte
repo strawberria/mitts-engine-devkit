@@ -9,6 +9,13 @@
 
     let overallValid = false;
     bundleValidStore.subscribe(bundleValidData => { overallValid = recursiveCheckValid(bundleValidData); });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.ctrlKey && event.key === 's') {
+            event.preventDefault();
+            mutate.exportProject();
+        }
+    });
 </script>
 
 <div class="h-full w-60

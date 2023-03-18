@@ -10,8 +10,9 @@
     let interactionCriteriaTypeStore: Writable<ProjectInteractionCriteriaType> = writable("flagEquals");
     function updateInteractionCriteriaType() {
         if($selectedInteractionIDStore === null || $selectedInteractionCriteriaIDStore === null
-            || $projectStore.data.interactions[$selectedInteractionIDStore]
-                .data.criteria[$selectedInteractionCriteriaIDStore] === undefined) { return; }
+            || $projectStore.data.interactions[$selectedInteractionIDStore] === undefined
+                || $projectStore.data.interactions[$selectedInteractionIDStore]
+                    .data.criteria[$selectedInteractionCriteriaIDStore] === undefined) { return; }
         $interactionCriteriaTypeStore = $projectStore.data.interactions[$selectedInteractionIDStore]
             .data.criteria[$selectedInteractionCriteriaIDStore].type;
     }
@@ -26,8 +27,8 @@
         "restraintNotWearing": [["Restraint", "", "w-full"]],
         "restraintWearingTag": [["Restraint Tag", "locked-star_key", "w-2/3"]],
         "restraintNotWearingTag": [["Restraint Tag", "locked-star_key", "w-2/3"]],
-        "objectFound": [["Object", "", "w-2/3"]],
-        "objectNotFound": [["Object", "", "w-2/3"]],
+        "objectFound": [["Object", "", "w-full"]],
+        "objectNotFound": [["Object", "", "w-full"]],
         "objectFoundTag": [["Object Tag", "unlocks-star_key", "w-2/3"]],
         "objectNotFoundTag": [["Object Tag", "unlocks-star_key", "w-2/3"]],
         "targetTag_component1": [["Target 1 Tag", "unlocks-star_key", "w-2/3"]],

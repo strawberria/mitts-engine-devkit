@@ -6,6 +6,7 @@
     import InteractionsSelectedResult from "../sections/InteractionsSelectedResult.svelte";
     import LabelSelect from "../components/LabelSelect.svelte";
     import LabelTextInput from "../components/LabelTextInput.svelte";
+    import LabelToggle from "../components/LabelToggle.svelte";
     import Section from "../components/Section.svelte";
     import SectionCol from "../components/SectionCol.svelte";
     import SectionRow from "../components/SectionRow.svelte";
@@ -120,61 +121,64 @@
 
 <SectionRow height={100}>
     <SectionCol width={40}>
-        <Section nogrow={true}>
+        <!-- <Section nogrow={true}>
             <svelte:fragment slot="content">
                 <p>
-                    Note: interactions are handled from top to bottom (stopping after handling the first with matching criteria)
+                    Note: interactions are handled from top to bottom, halting after handling the first with matching criteria
                 </p>
             </svelte:fragment>
+        </Section> -->
+        <InteractionsInteractionSelector/>
+        <Section style="height: 24.5em" 
+            nogrow={true}
+            label="Selected Interaction"
+            hidden={$selectedInteractionIDStore === null}>
+            <svelte:fragment slot="content">
+                <LabelTextInput bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].devName}
+                    label={"Development Name"}
+                    placeholder={"Unlock [Leather Cuffs] with [Small Key]"}
+                    valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].devName} />
+                <div class="flex flex-row space-x-3">
+                    <LabelSelect class="w-1/3" 
+                        bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].actionID}
+                        choicesData={interactionActionChoiceData}
+                        label={"Action"}
+                        valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].actionID} />
+                    <LabelSelect class="grow" 
+                        bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].stateID}
+                        choicesData={interactionStateChoiceData}
+                        label={"Attached State (optional)"} />
+                </div>
+                <div class="flex flex-row space-x-3">
+                    <LabelSelect class="w-1/2" 
+                        bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentTypes[0]}
+                        choicesData={interactionComponentTypeChoiceData}
+                        on:change={() => { resetSelectedComponent(0); }}
+                        label={"Component 1 Type"} />
+                    <LabelSelect class="w-1/2" 
+                        bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentTypes[1]}
+                        choicesData={interactionComponentTypeChoiceData}
+                        on:change={() => { resetSelectedComponent(1); }}
+                        disabled={!$interactionActionHasTwoStore}
+                        label={"Component 2 Type"} />
+                </div>
+                <div class="flex flex-row space-x-3">
+                    <LabelSelect class="w-1/2" 
+                        bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentIDs[0]}
+                        choicesData={interactionComponentChoiceData[0]}
+                        label={"Component 1"}
+                        valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].componentIDs[0]} />
+                    <LabelSelect class="w-1/2" 
+                        bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentIDs[1]}
+                        choicesData={interactionComponentChoiceData[1]}
+                        label={"Component 2"}
+                        disabled={!$interactionActionHasTwoStore}
+                        valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].componentIDs[1]} />
+                </div>
+                <LabelToggle bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].invalid}
+                    label={"Flag as Invalid"} />
+            </svelte:fragment>
         </Section>
-        <InteractionsInteractionSelector height={50}/>
-        {#if $selectedInteractionIDStore !== null}
-            <Section label="Selected Interaction">
-                <svelte:fragment slot="content">
-                    <LabelTextInput bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].devName}
-                        label={"Development Name"}
-                        placeholder={"Unlock [Leather Cuffs] with [Small Key]"}
-                        valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].devName} />
-                    <div class="flex flex-row space-x-3">
-                        <LabelSelect class="w-1/3" 
-                            bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].actionID}
-                            choicesData={interactionActionChoiceData}
-                            label={"Action"}
-                            valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].actionID} />
-                        <LabelSelect class="grow" 
-                            bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].stateID}
-                            choicesData={interactionStateChoiceData}
-                            label={"Attached State (optional)"} />
-                    </div>
-                    <div class="flex flex-row space-x-3">
-                        <LabelSelect class="w-1/2" 
-                            bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentTypes[0]}
-                            choicesData={interactionComponentTypeChoiceData}
-                            on:change={() => { resetSelectedComponent(0); }}
-                            label={"Component 1 Type"} />
-                        <LabelSelect class="w-1/2" 
-                            bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentTypes[1]}
-                            choicesData={interactionComponentTypeChoiceData}
-                            on:change={() => { resetSelectedComponent(1); }}
-                            disabled={!$interactionActionHasTwoStore}
-                            label={"Component 2 Type"} />
-                    </div>
-                    <div class="flex flex-row space-x-3">
-                        <LabelSelect class="w-1/2" 
-                            bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentIDs[0]}
-                            choicesData={interactionComponentChoiceData[0]}
-                            label={"Component 1"}
-                            valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].componentIDs[0]} />
-                        <LabelSelect class="w-1/2" 
-                            bind:value={$projectStore.data.interactions[$selectedInteractionIDStore].componentIDs[1]}
-                            choicesData={interactionComponentChoiceData[1]}
-                            label={"Component 2"}
-                            disabled={!$interactionActionHasTwoStore}
-                            valid={$bundleValidStore.interactions.interactions[$selectedInteractionIDStore].componentIDs[1]} />
-                    </div>
-                </svelte:fragment>
-            </Section>
-        {/if}
     </SectionCol>
     <SectionCol style="width: calc(30% - 0.75em)">
         {#if $selectedInteractionIDStore !== null}

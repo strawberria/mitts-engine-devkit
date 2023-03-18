@@ -41,4 +41,18 @@
     - Fixed bug causing interactions filter to not work properly
 - **0.3.1 - Added backup location to `locationRemove` interaction result for seamless 'replacement' of minimap locations**
     - Make sure to `locationAdd` the new location before `locationRemove` the old location, setting the "Backup Location" to the newly added location - this results in a seamless 'update' of the minimap.
-    
+- **0.3.2 - Fixed issues with `locationRemove` interaction result**
+    - Fixed currently selected minimap location not being preserved if other is removed
+    - Fixed location ID not resetting properly on location being removed if it's the first 
+    - Also added backup functionality when "Backup Location" is selected - if backup location is currently not accessible by the player, it's added (works identically to `locationAdd`)
+- **0.4.0 - Added interaction support for the default examine action + lots of other stuff!**
+    - New and imported projects now contain a default "Examine" action which displays relevant examine data for objects and restraints (restraint location examine data can be added manually via a `showDialog` interaction result)
+    - Interactions using the "examine" action execute interaction criteria and results as normal
+    - Added "Sentence Phrase" to restraint locations, restraints, and objects - target can be substituted within interaction dialog text using `{{restraints:restraint_location_name}}` (showing what you're currently restrained with there), `{{component1}}`, and `{{component2}}`
+    - Added new interaction result `flagInvalid` which flags the interaction as invalid, incrementing the maximum attempts
+    - Added development notes section within Metadata tab (for overall notes)
+    - Added filter textbox for objects and minimap locations
+    - Added additional spacing between newlines for everywhere supporting markdown text
+    - Another tip! You can use `<p style="text-align: center; font-weight: bold">[ 𝚆𝙸𝚃𝙷𝙸𝙽 𝙰 𝚃𝙾𝙿-𝚂𝙴𝙲𝚁𝙴𝚃 𝚄𝙽𝙳𝙴𝚁𝙶𝚁𝙾𝚄𝙽𝙳 𝙲𝙾𝙼𝙿𝙻𝙴𝚇 ]</p>` within any text supporting Markdown to center and bold text (also works with right align)!
+    - Added `CTRL + S` hotkey for conveniently saving projects
+    - Made some small stylistic changes and bugfixes 

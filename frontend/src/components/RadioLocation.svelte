@@ -30,10 +30,11 @@
         : ("text-slate-400 bg-slate-750 " + (valid
             ? "border-slate-600" : "border-red-900"))}`}
     on:click={handleClick}>
-    <div class="flex flex-col w-full">
-        <div class="flex flex-row items-center">
+    <div class="flex flex-col w-full min-w-0">
+        <div class="flex flex-row items-center"
+            style="flex-shrink: 1">
             <p class="w-4 text-left font-bold font-mono">{data.initial ? "I" : ""}</p>
-            <p class="text-left w-11/12 min-w-0 truncate h-6">
+            <p class="text-left min-w-0 truncate h-6">
                 {data.devName}
             </p>
         </div>

@@ -2,7 +2,7 @@
 - When you first open the development kit, you're greeted with the `Metadata` tab which contains basic game information and available actions (later segregated by state if necessary)
 - Fill in some basic game information including title, author, version, and synopsis (which shows up on the homepage, providing a basic overview of your game!)
 - Create some actions like "Cut", "Unlock", "Use", etc. if desired:
-    - **Note that "Examine" is already a default action and doesn't need to be added!**
+    - **Note that the default action "Examine" displays examine text along with any other interaction results if specified!**
     - The `verb` describes the intermediate verb when describing your action, and is only necessary when `Optional Second Argument` is ticked - for instance, the action "Unlock" with the verb "with" would generate text like: `Unlock [Small Padlock] with [Small key]`
     - `Order Matters` describes whether your actions are order-sensitive - for instance, you can `Combine [Box] and [Marbles]` in any order, but you can't `Unlock [Small Key] with [Small Padlock]`!
 
@@ -12,6 +12,7 @@
 ## Flow Charts - the `States` Tab
 - The `States` tab controls the flow of your game and through interactions, can link with any other state (more details below) - the `Description` and `State Image` determine what information and perhaps fluff the player will be given
     - There are four different types of states - `Normal` states with normal gameplay, `Transition` 'transitioning' between two states (`Transition` states can be chained!), and `Good Ending` / `Bad Ending` states ending the game.
+        - For transition states, the state marked as "Transition State" will be used as the next state.
         - **Note that the first non-ending state listed will be used as the introduction state!**
     - The `Available Actions` section determines what subset of actions detailed in the `Metadata` tab are currently available to the player - this is useful if you don't want your players to get sidetracked with actions that are only used later
     - The `Hints` section allows you to choose what hints to give to the player after a given number of (failed) attempts - this could be anything from vague hints like "What can you currently reach?" to very specific actions like `Unlock the [Small Padlock] with the [Small Key]` to help players seriously stuck. 
@@ -42,6 +43,7 @@
     - Within the `Selected Interaction` section, you can choose which `Action` to bind to the interaction, as well as an optional `Attached State` for when you want the interaction to only execute in a specific state (for some reason).
     - You can select different interaction component types from `Restraint`, `Restraint Location`, and `Object` - note that if the action does not have `Order Matters`, then it doesn't matter which order the components come in (though criteria will still be evaluated normally).
 - The `Criteria` tab shows all the criteria which must be fulfilled (logical AND) for the interaction results to be executed. Most interaction criteria are pretty straightforward, but here are some notes for those which are more ambiguous:
+    - When matching tags, you can also delimit with `,` to pass if any tags are matched
     - `targetTag_component1` / `targetTag_component2` - whether the components have the given tag, for instance trying to cut restraints with the "leather" tag. **Currently, when order does not matter, the criteria evaluates component 1 anyway - it should not be used in this way. TODO: update to a more reasonable interaction**
 - The `Results` tab shows all the results which are executed (in-order, if that matters) when all of an interaction's criteria are met. Most interaction results are pretty straightforward, but here are some notes for those which are more ambiguous:
     - `locationAdd` / `locationRemove` - add or remove the given minimap location from the player. This can either be used to completely close-off a location (by removing it), or "updating" a location's state by removing the old location and adding the new one. **The `Backup Location` select can be used to 'choose' the replacement location (if replacement location is available) when the previous location is removed**

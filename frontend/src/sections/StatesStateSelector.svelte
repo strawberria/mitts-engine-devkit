@@ -38,6 +38,7 @@
     data={$projectStore.data.states}
     defaultValue={{ "devName": "", "description": "", "notes": "", "imageID": null, "type": "normal", args: [],
         "availableActionIDs": [], "availableLocationIDs": [], "hints": [{ "attempts": -1, "text": "" }, 
-        { "attempts": -1, "text": "" }, { "attempts": -1, "text": "" }, { "attempts": -1, "text": "" }, { "attempts": -1, "text": "" }] }}
+        { "attempts": -1, "text": "" }, { "attempts": -1, "text": "" }, { "attempts": -1, "text": "" }, { "attempts": -1, "text": "" }],
+        "maxAttempts": -1, "transitionStateID": null }}
     on:dispatchClick={handleClick}>
 </SectionRadio>

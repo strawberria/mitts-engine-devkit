@@ -10,7 +10,6 @@
     export let height: number | null = null;
 
     let filterTextStore: Writable<string> = writable("");
-
     let combined: string;
     let selectorRadioData: SelectorRadioData[] = [];
     function updateSelectorRadioData() {
@@ -87,7 +86,7 @@
     data={$projectStore.data.interactions}
     defaultValue={{ "devName": "", "actionID": null, "componentIDs": [null, null], "stateID": null,
         "componentTypes": ["restraints", "restraints"], "order": { "criteria": [], "results": [] },
-        "data": { "criteria": {}, "results": {} }}}
+        "data": { "criteria": {}, "results": {} }, "invalid": false }}
     on:dispatchClick={handleClick}>
     <svelte:fragment slot="pre-content">
         <div class="flex flex-row items-start w-full pr-2">

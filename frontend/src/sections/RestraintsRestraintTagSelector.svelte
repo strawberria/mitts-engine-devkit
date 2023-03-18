@@ -15,6 +15,7 @@
     function updateSelectorRadioData() {
         if($selectedRestraintIDStore === null) { return; }
         selectorRadioData = Object.entries($projectStore.data.restraints[$selectedRestraintIDStore].tags)
+            .sort((a, b) => a[1].localeCompare(b[1]))
             .map(([index, tag]): SelectorRadioData => ({
                 id: index,
                 component: RadioRestraintTag,
@@ -41,7 +42,8 @@
     }
 </script>
 
-<SectionRadio height={height} 
+<SectionRadio class="shrink basis-0" 
+    height={height} 
     label="Restraint Tags"
     nobuttons={true}
     noheader={true}

@@ -55,37 +55,38 @@
 
 <SectionRow height={100}>
     <SectionCol width={30}>
-        <LocationsLocationSelector height={60} />
-        {#if $selectedLocationIDStore !== null}
-            <Section label="Selected Location"
-                style="height: calc(40% - 0.75em)">
-                <svelte:fragment slot="content">
-                    <LabelTextInput class="w-full" 
-                        bind:value={$projectStore.data.locations[$selectedLocationIDStore].devName}
-                        label={"Development Name"}
-                        placeholder={"Basement (dark)"}
-                        valid={$bundleValidStore.locations.locations[$selectedLocationIDStore].devName} />
-                    <LabelTextInput class="w-full" 
-                        bind:value={$projectStore.data.locations[$selectedLocationIDStore].name}
-                        label={"Name"}
-                        placeholder={"Basement"}
-                        valid={$bundleValidStore.locations.locations[$selectedLocationIDStore].name} />
-                    <LabelSelect class="w-2/3"
-                        bind:value={$projectStore.data.locations[$selectedLocationIDStore].imageID}
-                        choicesData={locationImageChoiceData}
-                        label={"Minimap Image"}
-                        valid={$bundleValidStore.locations.locations[$selectedLocationIDStore].imageID} />
-                    <LabelToggle class="w-1/3" 
-                        bind:value={$projectStore.data.locations[$selectedLocationIDStore].initial}
-                        label={"Initially Available"} />
-                </svelte:fragment>
-            </Section>
-        {/if}
+        <LocationsLocationSelector />
+        <Section class="shrink-0" 
+            style="height: 19.5em" 
+            label="Selected Location"
+            hidden={$selectedLocationIDStore === null}>
+            <svelte:fragment slot="content">
+                <LabelTextInput class="w-full" 
+                    bind:value={$projectStore.data.locations[$selectedLocationIDStore].devName}
+                    label={"Development Name"}
+                    placeholder={"Basement (dark)"}
+                    valid={$bundleValidStore.locations.locations[$selectedLocationIDStore].devName} />
+                <LabelTextInput class="w-full" 
+                    bind:value={$projectStore.data.locations[$selectedLocationIDStore].name}
+                    label={"Name"}
+                    placeholder={"Basement"}
+                    valid={$bundleValidStore.locations.locations[$selectedLocationIDStore].name} />
+                <LabelSelect class="w-2/3"
+                    bind:value={$projectStore.data.locations[$selectedLocationIDStore].imageID}
+                    choicesData={locationImageChoiceData}
+                    label={"Minimap Image"}
+                    valid={$bundleValidStore.locations.locations[$selectedLocationIDStore].imageID} />
+                <LabelToggle class="w-1/3" 
+                    bind:value={$projectStore.data.locations[$selectedLocationIDStore].initial}
+                    label={"Initially Available"} />
+            </svelte:fragment>
+        </Section>
     </SectionCol>
     <SectionCol style="width: calc(35% - 0.75rem)">
         {#if $selectedLocationIDStore !== null}
             <LocationsObjectSelector />
-            <LocationsMinimap style="height: calc(70% - 0.75rem)" />
+            <LocationsMinimap class="shrink-0" 
+                style="height: calc(70% - 0.75rem)" />
         {/if}
     </SectionCol>
     <SectionCol style="width: calc(35% - 0.75rem)">
@@ -121,7 +122,7 @@
                             {/if}
                         </div> -->
                     </div>
-                    <LabelSelect class="w-2/3"
+                    <LabelSelect class="w-full"
                         bind:value={$projectStore.data.locations[$selectedLocationIDStore].data.locationObjects[$selectedLocationObjectIDStore].objectID}
                         choicesData={locationObjectObjectChoiceData}
                         label={"Referenced Object"} />

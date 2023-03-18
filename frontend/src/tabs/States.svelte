@@ -66,32 +66,33 @@
 
 <SectionRow height={100}>
     <SectionCol width={35}>
-        <StatesStateSelector height={50} />
-        {#if $selectedStateIDStore !== null}
-            <Section label="Selected State">
-                <svelte:fragment slot="content">
-                    <LabelTextInput bind:value={$projectStore.data.states[$selectedStateIDStore].devName}
-                        label={"Name"}
-                        placeholder={"Kidnapped Stowaway"}
-                        valid={$bundleValidStore.states.states[$selectedStateIDStore].devName} />
-                    <div class="flex flex-row space-x-3">
-                        <LabelSelect class="w-1/3" 
-                            bind:value={$projectStore.data.states[$selectedStateIDStore].type}
-                            choicesData={stateTypeChoiceData}
-                            label={"State Type"} />
-                        <LabelSelect class="grow" 
-                            bind:value={$projectStore.data.states[$selectedStateIDStore].imageID}
-                            choicesData={stateImageChoiceData}
-                            label={"State Image"} 
-                            valid={$bundleValidStore.states.states[$selectedStateIDStore].imageID} />
-                    </div>
-                    <LabelTextArea bind:value={$projectStore.data.states[$selectedStateIDStore].description}
-                        label="Description"
-                        valid={$bundleValidStore.states.states[$selectedStateIDStore].description}
-                        rows={7} />
-                </svelte:fragment>
-            </Section>
-        {/if}
+        <StatesStateSelector />
+        <Section class="shrink-0" 
+            style="height: 26em" 
+            label="Selected State"
+            hidden={$selectedStateIDStore === null}>
+            <svelte:fragment slot="content">
+                <LabelTextInput bind:value={$projectStore.data.states[$selectedStateIDStore].devName}
+                    label={"Name"}
+                    placeholder={"Kidnapped Stowaway"}
+                    valid={$bundleValidStore.states.states[$selectedStateIDStore].devName} />
+                <div class="flex flex-row space-x-3">
+                    <LabelSelect class="w-1/3" 
+                        bind:value={$projectStore.data.states[$selectedStateIDStore].type}
+                        choicesData={stateTypeChoiceData}
+                        label={"State Type"} />
+                    <LabelSelect class="grow" 
+                        bind:value={$projectStore.data.states[$selectedStateIDStore].imageID}
+                        choicesData={stateImageChoiceData}
+                        label={"State Image"} 
+                        valid={$bundleValidStore.states.states[$selectedStateIDStore].imageID} />
+                </div>
+                <LabelTextArea bind:value={$projectStore.data.states[$selectedStateIDStore].description}
+                    label="Description"
+                    valid={$bundleValidStore.states.states[$selectedStateIDStore].description}
+                    rows={7} />
+            </svelte:fragment>
+        </Section>
     </SectionCol>
     <SectionCol style="width: calc(30% - 0.75rem)">
         {#if $selectedStateIDStore !== null}
@@ -104,7 +105,6 @@
                 <svelte:fragment slot="content">
                     <LabelTextArea bind:value={$projectStore.data.states[$selectedStateIDStore].notes}
                         label="Development Notes"
-                        valid={true}
                         rows={10} />
                 </svelte:fragment>
             </Section> 
@@ -139,7 +139,6 @@
             <Section nogrow={true}>
                 <svelte:fragment slot="content">
                     <p class="text-sm">Transition to state after maximum attempts reached</p>
-                    {$bundleValidStore.states.states[$selectedStateIDStore].transition}
                     <div class="flex flex-row w-full space-x-3">
                         <LabelNumberInput class="w-16"
                             bind:value={$projectStore.data.states[$selectedStateIDStore].maxAttempts}

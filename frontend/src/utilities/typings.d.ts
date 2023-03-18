@@ -19,6 +19,7 @@ export interface ProjectData extends ReducedProjectData {
             author:   string;
             version:  string;
             synopsis: string;
+            notes:    string;
         }
         actions:             string[];
         images:              string[];
@@ -77,23 +78,26 @@ export interface ProjectStateData extends ProjectConstruct {
 
 export interface ProjectRestraintLocationData extends ProjectConstruct {
     name:               string;
+    sentencePhrase:     string;
     initialRestraintID: string | null;
 }
 
 export interface ProjectRestraintData extends ProjectConstruct {
     name:                string;
     devName:             string;
+    sentencePhrase:      string;
     restraintLocationID: string | null;
     tags:                string[];
     examine:             string;
 }
 
 export interface ProjectObjectData extends ProjectConstruct {
-    name:    string;
-    devName: string;
-    tags:    string[];
-    examine: string;
-    initial: boolean;
+    name:           string;
+    devName:        string;
+    sentencePhrase: string;
+    tags:           string[];
+    examine:        string;
+    initial:        boolean;
 }
 
 export interface ProjectInteractionData extends ProjectConstruct {
@@ -113,6 +117,7 @@ export interface ProjectInteractionData extends ProjectConstruct {
         criteria: StoredData<ProjectInteractionCriteriaData>;
         results:  StoredData<ProjectInteractionResultData>;
     };
+    invalid:         boolean;
 }
 
 export type ProjectInteractionCriteriaType = "flagEquals" | "flagNotEquals" 
@@ -126,7 +131,7 @@ export interface ProjectInteractionCriteriaData extends ProjectConstruct {
 }
 
 export type ProjectInteractionResultType = "restraintAdd" | "restraintRemove"
-    | "restraintAddTarget" | "restraintRemoveTarget"
+    | "addRevealTarget" | "removeHideTarget"
     | "objectReveal" | "objectHide" | "setState" | "setFlag" | "showDialog"
     | "locationAdd" | "locationRemove";
 export interface ProjectInteractionResultData extends ProjectConstruct {
