@@ -5,7 +5,7 @@
     Development kit assisting with creating DiD escape games using the <i>Mitts-Engine</i><br />
     Developed using Svelte / TypeScript / Tailwind CSS (frontend) and Go + Wails v2 (backend) <br />
     <b>Community-uploaded games repository:</b> <a href="https://github.com/strawberria/mitts-engine-games">strawberria/mitts-engine-games</a> <br />
-    <b>Experience the games here:</b> <a href="https://strawberria.github.io/s">strawberria.github.io</a> <br />
+    <b>Experience the games here:</b> <a href="https://strawberria.github.io">strawberria.github.io</a> <br />
     <br />
     <a href="https://ko-fi.com/G2G2G0ZG3">
         <img alt="Kofi" src="https://ko-fi.com/img/githubbutton_sm.svg"/>
